@@ -39,16 +39,14 @@ for num in nums:               # walk houses left to right
       ],
       starter: `def rob(nums):
     pass  # TODO: your turn
-
-
-# ---- tests ----
-assert rob([1, 2, 3, 1]) == 4
-assert rob([2, 7, 9, 3, 1]) == 12
-assert rob([2, 1, 1, 2]) == 4
-assert rob([5]) == 5
-assert rob([]) == 0
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>[1, 2, 3, 1]</code> &rarr; <code>4</code> (houses 0 and 2)", test: "assert rob([1, 2, 3, 1]) == 4" },
+        { text: "A longer street: <code>[2, 7, 9, 3, 1]</code> &rarr; <code>12</code>", test: "assert rob([2, 7, 9, 3, 1]) == 12" },
+        { text: "Even houses can lose: <code>[2, 1, 1, 2]</code> &rarr; <code>4</code> (the ends)", test: "assert rob([2, 1, 1, 2]) == 4" },
+        { text: "One house: <code>[5]</code> &rarr; <code>5</code>", test: "assert rob([5]) == 5" },
+        { text: "No houses: <code>[]</code> &rarr; <code>0</code>", test: "assert rob([]) == 0" }
+      ],
       solution: `def rob(nums):
     prev, curr = 0, 0
     for num in nums:
@@ -90,16 +88,14 @@ for _ in range(m - 1):         # each pass folds in one more row
       ],
       starter: `def unique_paths(m, n):
     pass  # TODO: your turn
-
-
-# ---- tests ----
-assert unique_paths(3, 7) == 28
-assert unique_paths(3, 2) == 3
-assert unique_paths(3, 3) == 6
-assert unique_paths(1, 1) == 1
-assert unique_paths(2, 2) == 2
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>3 x 7</code> &rarr; <code>28</code>", test: "assert unique_paths(3, 7) == 28" },
+        { text: "A thin grid: <code>3 x 2</code> &rarr; <code>3</code>", test: "assert unique_paths(3, 2) == 3" },
+        { text: "A square: <code>3 x 3</code> &rarr; <code>6</code>", test: "assert unique_paths(3, 3) == 6" },
+        { text: "One cell: <code>1 x 1</code> &rarr; <code>1</code>", test: "assert unique_paths(1, 1) == 1" },
+        { text: "The smallest square: <code>2 x 2</code> &rarr; <code>2</code>", test: "assert unique_paths(2, 2) == 2" }
+      ],
       solution: `def unique_paths(m, n):
     row = [1] * n
     for _ in range(m - 1):
@@ -166,16 +162,14 @@ for i in range(len(s)):               # every index: odd and even centers
 
 def longest_palindrome(s):
     pass  # TODO: your turn
-
-
-# ---- tests ----
-assert longest_palindrome("babad") in ("bab", "aba")
-assert longest_palindrome("cbbd") == "bb"
-assert longest_palindrome("bananas") == "anana"
-assert longest_palindrome("a") == "a"
-assert longest_palindrome("") == ""
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>babad</code> &rarr; <code>bab</code> or <code>aba</code>", test: "assert longest_palindrome(\"babad\") in (\"bab\", \"aba\")" },
+        { text: "Even length: <code>cbbd</code> &rarr; <code>bb</code>", test: "assert longest_palindrome(\"cbbd\") == \"bb\"" },
+        { text: "The longest hides inside: <code>bananas</code> &rarr; <code>anana</code>", test: "assert longest_palindrome(\"bananas\") == \"anana\"" },
+        { text: "One character: <code>a</code> &rarr; <code>a</code>", test: "assert longest_palindrome(\"a\") == \"a\"" },
+        { text: "An empty string returns an empty string", test: "assert longest_palindrome(\"\") == \"\"" }
+      ],
       solution: `def expand(s, left, right):
     while left >= 0 and right < len(s) and s[left] == s[right]:
         left -= 1

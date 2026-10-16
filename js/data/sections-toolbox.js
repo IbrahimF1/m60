@@ -49,15 +49,14 @@ for ch in 'banana':
       ],
       starter: `def running_sum(nums):
     pass  # TODO: your turn
-
-
-# ---- tests ----
-assert running_sum([1, 2, 3, 4]) == [1, 3, 6, 10]
-assert running_sum([1, 1, 1, 1, 1]) == [1, 2, 3, 4, 5]
-assert running_sum([3, 1, 2, 10, 1]) == [3, 4, 6, 16, 17]
-assert running_sum([]) == []
-assert running_sum([5]) == [5]
-print("All tests passed!")`,
+`,
+      tasks: [
+        { text: "The example: <code>[1, 2, 3, 4]</code> &rarr; <code>[1, 3, 6, 10]</code>", test: "assert running_sum([1, 2, 3, 4]) == [1, 3, 6, 10]" },
+        { text: "All ones: <code>[1, 1, 1, 1, 1]</code> &rarr; <code>[1, 2, 3, 4, 5]</code>", test: "assert running_sum([1, 1, 1, 1, 1]) == [1, 2, 3, 4, 5]" },
+        { text: "Mixed values: <code>[3, 1, 2, 10, 1]</code> &rarr; <code>[3, 4, 6, 16, 17]</code>", test: "assert running_sum([3, 1, 2, 10, 1]) == [3, 4, 6, 16, 17]" },
+        { text: "An empty list returns an empty list", test: "assert running_sum([]) == []" },
+        { text: "A single element maps to itself: <code>[5]</code> &rarr; <code>[5]</code>", test: "assert running_sum([5]) == [5]" }
+      ],
       solution: `def running_sum(nums):
     out = []
     total = 0
@@ -65,15 +64,7 @@ print("All tests passed!")`,
         total += n
         out.append(total)
     return out
-
-
-# ---- tests ----
-assert running_sum([1, 2, 3, 4]) == [1, 3, 6, 10]
-assert running_sum([1, 1, 1, 1, 1]) == [1, 2, 3, 4, 5]
-assert running_sum([3, 1, 2, 10, 1]) == [3, 4, 6, 16, 17]
-assert running_sum([]) == []
-assert running_sum([5]) == [5]
-print("All tests passed!")`
+`
     }
   },
   {
@@ -122,29 +113,20 @@ best = heapq.heappop(heap)           # (1, 'a')</code></pre>
 
 def is_anagram(s, t):
     pass  # TODO: your turn
-
-
-# ---- tests ----
-assert is_anagram('anagram', 'nagaram') is True
-assert is_anagram('rat', 'car') is False
-assert is_anagram('', '') is True
-assert is_anagram('a', 'ab') is False
-assert is_anagram('aab', 'aba') is True
-print("All tests passed!")`,
+`,
+      tasks: [
+        { text: "Anagrams: <code>anagram</code> and <code>nagaram</code> return <code>True</code>", test: "assert is_anagram('anagram', 'nagaram') is True" },
+        { text: "Not anagrams: <code>rat</code> and <code>car</code> return <code>False</code>", test: "assert is_anagram('rat', 'car') is False" },
+        { text: "Two empty strings are anagrams", test: "assert is_anagram('', '') is True" },
+        { text: "Different lengths can never match: <code>a</code> and <code>ab</code>", test: "assert is_anagram('a', 'ab') is False" },
+        { text: "Repeated letters still count: <code>aab</code> and <code>aba</code>", test: "assert is_anagram('aab', 'aba') is True" }
+      ],
       solution: `from collections import Counter
 
 
 def is_anagram(s, t):
     return Counter(s) == Counter(t)
-
-
-# ---- tests ----
-assert is_anagram('anagram', 'nagaram') is True
-assert is_anagram('rat', 'car') is False
-assert is_anagram('', '') is True
-assert is_anagram('a', 'ab') is False
-assert is_anagram('aab', 'aba') is True
-print("All tests passed!")`
+`
     }
   },
   {
@@ -198,15 +180,14 @@ def bad(seen=[]):               # trap: seen survives calls
       ],
       starter: `def product_except_self(nums):
     pass  # TODO: your turn
-
-
-# ---- tests ----
-assert product_except_self([1, 2, 3, 4]) == [24, 12, 8, 6]
-assert product_except_self([-1, 1, 0, -3, 3]) == [0, 0, 9, 0, 0]
-assert product_except_self([2, 3]) == [3, 2]
-assert product_except_self([5]) == [1]
-assert product_except_self([]) == []
-print("All tests passed!")`,
+`,
+      tasks: [
+        { text: "The example: <code>[1, 2, 3, 4]</code> &rarr; <code>[24, 12, 8, 6]</code>", test: "assert product_except_self([1, 2, 3, 4]) == [24, 12, 8, 6]" },
+        { text: "A single zero zeroes every other slot: <code>[-1, 1, 0, -3, 3]</code> &rarr; <code>[0, 0, 9, 0, 0]</code>", test: "assert product_except_self([-1, 1, 0, -3, 3]) == [0, 0, 9, 0, 0]" },
+        { text: "Two elements swap: <code>[2, 3]</code> &rarr; <code>[3, 2]</code>", test: "assert product_except_self([2, 3]) == [3, 2]" },
+        { text: "One element: the product of nothing is <code>1</code>", test: "assert product_except_self([5]) == [1]" },
+        { text: "Empty input returns empty output", test: "assert product_except_self([]) == []" }
+      ],
       solution: `def product_except_self(nums):
     n = len(nums)
     out = [1] * n
@@ -219,15 +200,7 @@ print("All tests passed!")`,
         out[i] *= suffix
         suffix *= nums[i]
     return out
-
-
-# ---- tests ----
-assert product_except_self([1, 2, 3, 4]) == [24, 12, 8, 6]
-assert product_except_self([-1, 1, 0, -3, 3]) == [0, 0, 9, 0, 0]
-assert product_except_self([2, 3]) == [3, 2]
-assert product_except_self([5]) == [1]
-assert product_except_self([]) == []
-print("All tests passed!")`
+`
     }
   }
 ];

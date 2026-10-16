@@ -8,6 +8,7 @@ import { PATTERNS_A } from "./js/data/sections-patterns-a.js";
 import { PATTERNS_B } from "./js/data/sections-patterns-b.js";
 import { PATTERNS_C } from "./js/data/sections-patterns-c.js";
 import { CHEATSHEET } from "./js/data/reference.js";
+import { composeProbeScript } from "./js/checks.js";
 
 const ORDER = [
   "python-core", "stdlib", "idioms",
@@ -65,13 +66,18 @@ for (const s of ALL) {
   }
   const st = ex.starter || "";
   const so = ex.solution || "";
-  if (!st.includes("# ---- tests ----")) err(where + " starter missing tests marker");
-  if (!st.includes("print(\"All tests passed!\")")) err(where + " starter missing success print");
-  if (!st.includes("TODO")) err(where + " starter missing TODO");
+  if (!st || !st.includes("TODO")) err(where + " starter missing stub");
+  if (/\bassert\b/.test(st)) err(where + " starter still contains checks");
+  if (st.includes("`") || so.includes("`")) err(where + " python contains backtick");
+  const tk = ex.tasks;
+  if (!Array.isArray(tk) || tk.length < 3 || tk.length > 6) err(where + " tasks count=" + ((tk || []).length));
+  for (const t of tk || []) {
+    if (!t || typeof t.text !== "string" || !t.text) err(where + " task text missing");
+    if (!t || typeof t.test !== "string" || !t.test.startsWith("assert ")) err(where + " task test missing: " + (t && t.test));
+    if (String((t && t.text) || "").includes("`") || String((t && t.test) || "").includes("`")) err(where + " task contains backtick");
+  }
   if (!so || so === st) err(where + " solution missing/identical");
   if (so.includes("TODO")) err(where + " solution still has TODO");
-  if (st.includes("`") || so.includes("`")) err(where + " python contains backtick");
-  if (!!ex.solution && !st.startsWith(so.slice(0, 20).replace(/\s+/g, " ").trim().split("def")[0] || "x") && false) { /* noop */ }
   if (!errors) ok(where + " " + s.title);
 }
 
@@ -108,6 +114,35 @@ for (const id of ORDER) {
     else ok(p);
   } catch (e) {
     err(p + " exited nonzero: " + String(e.stderr || e.message).slice(-300));
+  }
+}
+
+console.log("tasks (composed with js/checks.js, run in python):");
+function runComposed(code, tasks) {
+  const out = execFileSync("python", ["-c", composeProbeScript(code, tasks)], { encoding: "utf8", timeout: 15000 });
+  const line = out.trim().split("\n").filter(Boolean).pop();
+  return JSON.parse(line);
+}
+for (const id of ORDER) {
+  const s = byId.get(id);
+  if (!s) continue;
+  const ex = s.exercise || {};
+  const tasks = ex.tasks || [];
+  try {
+    const results = runComposed(ex.solution || "", tasks);
+    const failing = results.map((v, i) => (v === null ? null : i + 1)).filter((v) => v !== null);
+    if (results.length !== tasks.length) err("[" + id + "] solution produced " + results.length + " verdicts for " + tasks.length + " tasks");
+    else if (failing.length) err("[" + id + "] solution fails task(s) " + failing.join(", "));
+    else ok("[" + id + "] solution passes all " + tasks.length + " tasks");
+  } catch (e) {
+    err("[" + id + "] solution did not run: " + String(e.stderr || e.message).slice(-200));
+  }
+  try {
+    const results = runComposed(ex.starter || "", tasks);
+    if (results.every((v) => v === null)) err("[" + id + "] starter already passes every task");
+    else ok("[" + id + "] starter fails " + results.filter((v) => v !== null).length + "/" + tasks.length + " as intended");
+  } catch (e) {
+    err("[" + id + "] starter did not run: " + String(e.stderr || e.message).slice(-200));
   }
 }
 

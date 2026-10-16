@@ -78,15 +78,14 @@ def build_tree(levels):
 # Return the node values one level at a time, left to right.
 def level_order(root):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert level_order(build_tree([3, 9, 20, None, None, 15, 7])) == [[3], [9, 20], [15, 7]]
-assert level_order(build_tree([1])) == [[1]]
-assert level_order(build_tree([1, 2, 3, 4, None, None, 5])) == [[1], [2, 3], [4, 5]]
-assert level_order(build_tree([])) == []
-assert level_order(None) == []
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example tree <code>[3, 9, 20, None, None, 15, 7]</code> &rarr; <code>[[3], [9, 20], [15, 7]]</code>", test: "assert level_order(build_tree([3, 9, 20, None, None, 15, 7])) == [[3], [9, 20], [15, 7]]" },
+        { text: "A lone root: <code>[1]</code> &rarr; <code>[[1]]</code>", test: "assert level_order(build_tree([1])) == [[1]]" },
+        { text: "A hole in a level: <code>[1, 2, 3, 4, None, None, 5]</code> &rarr; <code>[[1], [2, 3], [4, 5]]</code>", test: "assert level_order(build_tree([1, 2, 3, 4, None, None, 5])) == [[1], [2, 3], [4, 5]]" },
+        { text: "An empty building list: <code>[]</code> &rarr; <code>[]</code>", test: "assert level_order(build_tree([])) == []" },
+        { text: "A <code>None</code> root &rarr; <code>[]</code>", test: "assert level_order(None) == []" }
+      ],
       solution: `from collections import deque
 
 
@@ -182,15 +181,14 @@ ${FIG.rings}
       starter: `# Count islands: "1" is land, "0" is water, connections are up/down/left/right
 def num_islands(grid):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert num_islands([["1", "1", "1", "1", "0"], ["1", "1", "0", "1", "0"], ["1", "1", "0", "0", "0"], ["0", "0", "0", "0", "0"]]) == 1
-assert num_islands([["1", "1", "0", "0", "0"], ["1", "1", "0", "0", "0"], ["0", "0", "1", "0", "0"], ["0", "0", "0", "1", "1"]]) == 3
-assert num_islands([["0"]]) == 0
-assert num_islands([["1"]]) == 1
-assert num_islands([["1", "0", "1", "0", "1"]]) == 3
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example grid: one blob of land &rarr; <code>1</code>", test: "assert num_islands([[\"1\", \"1\", \"1\", \"1\", \"0\"], [\"1\", \"1\", \"0\", \"1\", \"0\"], [\"1\", \"1\", \"0\", \"0\", \"0\"], [\"0\", \"0\", \"0\", \"0\", \"0\"]]) == 1" },
+        { text: "Three separate islands &rarr; <code>3</code>", test: "assert num_islands([[\"1\", \"1\", \"0\", \"0\", \"0\"], [\"1\", \"1\", \"0\", \"0\", \"0\"], [\"0\", \"0\", \"1\", \"0\", \"0\"], [\"0\", \"0\", \"0\", \"1\", \"1\"]]) == 3" },
+        { text: "All water: <code>[[\"0\"]]</code> &rarr; <code>0</code>", test: "assert num_islands([[\"0\"]]) == 0" },
+        { text: "All land: <code>[[\"1\"]]</code> &rarr; <code>1</code>", test: "assert num_islands([[\"1\"]]) == 1" },
+        { text: "A single row, alternating: <code>1 0 1 0 1</code> &rarr; <code>3</code>", test: "assert num_islands([[\"1\", \"0\", \"1\", \"0\", \"1\"]]) == 3" }
+      ],
       solution: `# Count islands: "1" is land, "0" is water, connections are up/down/left/right
 def num_islands(grid):
     rows, cols = len(grid), len(grid[0])
@@ -256,14 +254,13 @@ ${FIG.backtrack}
       starter: `# Return every permutation of nums, as a list of lists
 def permute(nums):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert permute([]) == [[]]
-assert permute([1]) == [[1]]
-assert sorted(permute([1, 2])) == [[1, 2], [2, 1]]
-assert sorted(permute([1, 2, 3])) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "An empty list has one arrangement: <code>[[]]</code>", test: "assert permute([]) == [[]]" },
+        { text: "One element, one arrangement: <code>[[1]]</code>", test: "assert permute([1]) == [[1]]" },
+        { text: "Two elements, both orders: <code>[[1, 2], [2, 1]]</code>", test: "assert sorted(permute([1, 2])) == [[1, 2], [2, 1]]" },
+        { text: "Three elements, all six orders", test: "assert sorted(permute([1, 2, 3])) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]" }
+      ],
       solution: `# Return every permutation of nums, as a list of lists
 def permute(nums):
     result = []
@@ -326,15 +323,14 @@ import heapq
 # Return the k most frequent values, most frequent first.
 def top_k_frequent(nums, k):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert top_k_frequent([1, 1, 1, 2, 2, 3], 2) == [1, 2]
-assert top_k_frequent([1], 1) == [1]
-assert top_k_frequent([1, 1, 2, 3], 2) == [1, 3]
-assert top_k_frequent([4, 4, 4, 5, 5, 6], 1) == [4]
-assert top_k_frequent([1, 2], 2) == [2, 1]
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>[1, 1, 1, 2, 2, 3]</code>, <code>k = 2</code> &rarr; <code>[1, 2]</code>", test: "assert top_k_frequent([1, 1, 1, 2, 2, 3], 2) == [1, 2]" },
+        { text: "One value, one slot: <code>[1]</code>, <code>k = 1</code> &rarr; <code>[1]</code>", test: "assert top_k_frequent([1], 1) == [1]" },
+        { text: "A tie, smaller value first: <code>[1, 1, 2, 3]</code>, <code>k = 2</code> &rarr; <code>[1, 3]</code>", test: "assert top_k_frequent([1, 1, 2, 3], 2) == [1, 3]" },
+        { text: "Top one: <code>[4, 4, 4, 5, 5, 6]</code>, <code>k = 1</code> &rarr; <code>[4]</code>", test: "assert top_k_frequent([4, 4, 4, 5, 5, 6], 1) == [4]" },
+        { text: "Everything fits: <code>[1, 2]</code>, <code>k = 2</code> &rarr; <code>[2, 1]</code>", test: "assert top_k_frequent([1, 2], 2) == [2, 1]" }
+      ],
       solution: `from collections import Counter
 import heapq
 
@@ -390,15 +386,14 @@ print(merge([[1, 3], [2, 6], [8, 10], [15, 18]]))
       starter: `# Merge overlapping intervals; return disjoint [start, end] pairs in order
 def merge(intervals):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert merge([[1, 3], [2, 6], [8, 10], [15, 18]]) == [[1, 6], [8, 10], [15, 18]]
-assert merge([[1, 4], [4, 5]]) == [[1, 5]]
-assert merge([[1, 4], [2, 3]]) == [[1, 4]]
-assert merge([[1, 4], [0, 4]]) == [[0, 4]]
-assert merge([]) == []
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>[1, 3] [2, 6] [8, 10] [15, 18]</code> &rarr; <code>[1, 6] [8, 10] [15, 18]</code>", test: "assert merge([[1, 3], [2, 6], [8, 10], [15, 18]]) == [[1, 6], [8, 10], [15, 18]]" },
+        { text: "Touching counts as overlap: <code>[1, 4]</code> and <code>[4, 5]</code> &rarr; <code>[1, 5]</code>", test: "assert merge([[1, 4], [4, 5]]) == [[1, 5]]" },
+        { text: "Contained: <code>[1, 4]</code> and <code>[2, 3]</code> &rarr; <code>[1, 4]</code>", test: "assert merge([[1, 4], [2, 3]]) == [[1, 4]]" },
+        { text: "Out of order: <code>[1, 4]</code> and <code>[0, 4]</code> &rarr; <code>[0, 4]</code>", test: "assert merge([[1, 4], [0, 4]]) == [[0, 4]]" },
+        { text: "Empty list &rarr; <code>[]</code>", test: "assert merge([]) == []" }
+      ],
       solution: `# Merge overlapping intervals; return disjoint [start, end] pairs in order
 def merge(intervals):
     merged = []

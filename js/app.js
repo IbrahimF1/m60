@@ -7,7 +7,7 @@ import { PATTERNS_A } from "./data/sections-patterns-a.js";
 import { PATTERNS_B } from "./data/sections-patterns-b.js";
 import { PATTERNS_C } from "./data/sections-patterns-c.js";
 import { CHEATSHEET } from "./data/reference.js";
-import { mountExercise } from "./sandpack.js?v=16";
+import { mountExercise } from "./sandpack.js?v=17";
 
 /* Canonical chapter order, regardless of import order. */
 const ORDER = [
@@ -261,7 +261,14 @@ function renderSection(el, id) {
   document.title = s.title + " \u00b7 Medium in 60";
 
   const mount = el.querySelector("#sp-mount");
-  if (mount && ex.starter) mountExercise(mount, s);
+  if (mount && ex.starter) {
+    mountExercise(mount, s, {
+      go: {
+        href: next ? "#/section/" + next.id : "#/",
+        label: next ? "Continue to chapter " + String(idx + 2).padStart(2, "0") : "Back to the syllabus"
+      }
+    });
+  }
 
   const btn = el.querySelector(".mark-done");
   btn.addEventListener("click", () => {

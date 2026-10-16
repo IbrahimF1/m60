@@ -49,14 +49,13 @@ print(dict(groups))
 # Group anagrams by their sorted-letter key.
 def group_anagrams(words):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert sorted(sorted(g) for g in group_anagrams(["eat", "tea", "tan", "ate", "nat", "bat"])) == [["ate", "eat", "tea"], ["bat"], ["nat", "tan"]]
-assert sorted(sorted(g) for g in group_anagrams(["ab", "ba", "abc", "cba"])) == [["ab", "ba"], ["abc", "cba"]]
-assert group_anagrams([""]) == [[""]]
-assert group_anagrams(["a"]) == [["a"]]
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The six-word example groups into the buckets <code>ate eat tea</code>, <code>bat</code>, and <code>nat tan</code>", test: "assert sorted(sorted(g) for g in group_anagrams([\"eat\", \"tea\", \"tan\", \"ate\", \"nat\", \"bat\"])) == [[\"ate\", \"eat\", \"tea\"], [\"bat\"], [\"nat\", \"tan\"]]" },
+        { text: "Two pairs: <code>ab/ba</code> and <code>abc/cba</code>", test: "assert sorted(sorted(g) for g in group_anagrams([\"ab\", \"ba\", \"abc\", \"cba\"])) == [[\"ab\", \"ba\"], [\"abc\", \"cba\"]]" },
+        { text: "The empty string is its own anagram: <code>[\"\"]</code> &rarr; <code>[[\"\"]]</code>", test: "assert group_anagrams([\"\"]) == [[\"\"]]" },
+        { text: "A single word stands alone: <code>[\"a\"]</code> &rarr; <code>[[\"a\"]]</code>", test: "assert group_anagrams([\"a\"]) == [[\"a\"]]" }
+      ],
       solution: `from collections import defaultdict
 
 
@@ -117,14 +116,13 @@ while left &lt; right:
       starter: `# numbers is sorted; return 1-indexed [left, right] of the pair that hits target.
 def two_sum(numbers, target):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert two_sum([2, 7, 11, 15], 9) == [1, 2]
-assert two_sum([2, 3, 4], 6) == [1, 3]
-assert two_sum([-1, 0], -1) == [1, 2]
-assert two_sum([1, 2, 3, 4, 4, 9, 56, 90], 8) == [4, 5]
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>[2, 7, 11, 15]</code>, target <code>9</code> &rarr; <code>[1, 2]</code>", test: "assert two_sum([2, 7, 11, 15], 9) == [1, 2]" },
+        { text: "The middle pair: <code>[2, 3, 4]</code>, target <code>6</code> &rarr; <code>[1, 3]</code>", test: "assert two_sum([2, 3, 4], 6) == [1, 3]" },
+        { text: "Negatives: <code>[-1, 0]</code>, target <code>-1</code> &rarr; <code>[1, 2]</code>", test: "assert two_sum([-1, 0], -1) == [1, 2]" },
+        { text: "Duplicates in sight: <code>[1, 2, 3, 4, 4, 9, 56, 90]</code>, target <code>8</code> &rarr; <code>[4, 5]</code>", test: "assert two_sum([1, 2, 3, 4, 4, 9, 56, 90], 8) == [4, 5]" }
+      ],
       solution: `# numbers is sorted; return 1-indexed [left, right] of the pair that hits target.
 def two_sum(numbers, target):
     left, right = 0, len(numbers) - 1
@@ -184,15 +182,14 @@ print(best)
       starter: `# Length of the longest substring of s with no repeated character.
 def length_of_longest_substring(s):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert length_of_longest_substring("abcabcbb") == 3
-assert length_of_longest_substring("bbbbb") == 1
-assert length_of_longest_substring("pwwkew") == 3
-assert length_of_longest_substring("dvdf") == 3
-assert length_of_longest_substring("") == 0
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>abcabcbb</code> &rarr; <code>3</code> (<code>abc</code>)", test: "assert length_of_longest_substring(\"abcabcbb\") == 3" },
+        { text: "All the same letter: <code>bbbbb</code> &rarr; <code>1</code>", test: "assert length_of_longest_substring(\"bbbbb\") == 1" },
+        { text: "The answer can sit anywhere: <code>pwwkew</code> &rarr; <code>3</code> (<code>wke</code>)", test: "assert length_of_longest_substring(\"pwwkew\") == 3" },
+        { text: "A repeat after a unique run: <code>dvdf</code> &rarr; <code>3</code> (<code>vdf</code>)", test: "assert length_of_longest_substring(\"dvdf\") == 3" },
+        { text: "Empty string: <code>0</code>", test: "assert length_of_longest_substring(\"\") == 0" }
+      ],
       solution: `# Length of the longest substring of s with no repeated character.
 def length_of_longest_substring(s):
     last = {}                     # char -> most recent index seen
@@ -262,14 +259,13 @@ def hours_at(piles, k):
 # Smallest speed k that clears every pile within h hours.
 def min_eating_speed(piles, h):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert min_eating_speed([3, 6, 7, 11], 8) == 4
-assert min_eating_speed([30, 11, 23, 4, 20], 5) == 30
-assert min_eating_speed([30, 11, 23, 4, 20], 6) == 23
-assert min_eating_speed([5], 3) == 2
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>[3, 6, 7, 11]</code>, <code>h = 8</code> &rarr; <code>4</code>", test: "assert min_eating_speed([3, 6, 7, 11], 8) == 4" },
+        { text: "Barely enough hours: <code>[30, 11, 23, 4, 20]</code>, <code>h = 5</code> &rarr; <code>30</code>", test: "assert min_eating_speed([30, 11, 23, 4, 20], 5) == 30" },
+        { text: "One spare hour: the same piles with <code>h = 6</code> &rarr; <code>23</code>", test: "assert min_eating_speed([30, 11, 23, 4, 20], 6) == 23" },
+        { text: "One pile: <code>[5]</code>, <code>h = 3</code> &rarr; <code>2</code>", test: "assert min_eating_speed([5], 3) == 2" }
+      ],
       solution: `# Total hours needed to finish every pile at speed k, one pile per hour.
 def hours_at(piles, k):
     return sum(-(-p // k) for p in piles)   # ceil(p / k), no imports
@@ -360,15 +356,14 @@ def to_list(head):
 # Reorder L0, L1, ..., Ln into L0, Ln, L1, Ln-1, ... in place; return the head.
 def reorder_list(head):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert to_list(reorder_list(build_list([1, 2, 3, 4]))) == [1, 4, 2, 3]
-assert to_list(reorder_list(build_list([1, 2, 3, 4, 5]))) == [1, 5, 2, 4, 3]
-assert to_list(reorder_list(build_list([1, 2]))) == [1, 2]
-assert to_list(reorder_list(build_list([1]))) == [1]
-assert to_list(reorder_list(build_list([]))) == []
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "Even length: <code>1 2 3 4</code> &rarr; <code>1 4 2 3</code>", test: "assert to_list(reorder_list(build_list([1, 2, 3, 4]))) == [1, 4, 2, 3]" },
+        { text: "Odd length: <code>1 2 3 4 5</code> &rarr; <code>1 5 2 4 3</code>", test: "assert to_list(reorder_list(build_list([1, 2, 3, 4, 5]))) == [1, 5, 2, 4, 3]" },
+        { text: "Two nodes already read first, last: unchanged", test: "assert to_list(reorder_list(build_list([1, 2]))) == [1, 2]" },
+        { text: "A single node: unchanged", test: "assert to_list(reorder_list(build_list([1]))) == [1]" },
+        { text: "An empty list stays empty", test: "assert to_list(reorder_list(build_list([]))) == []" }
+      ],
       solution: `class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
@@ -452,15 +447,14 @@ print(answer)
       starter: `# answer[i] = days until a strictly warmer day, or 0 if none comes.
 def daily_temperatures(temps):
     pass  # TODO: your turn
-
-# ---- tests ----
-assert daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0]
-assert daily_temperatures([30, 40, 50, 60]) == [1, 1, 1, 0]
-assert daily_temperatures([30, 60, 90]) == [1, 1, 0]
-assert daily_temperatures([90, 80, 70]) == [0, 0, 0]
-assert daily_temperatures([55]) == [0]
-print("All tests passed!")
 `,
+      tasks: [
+        { text: "The example: <code>[73, 74, 75, 71, 69, 72, 76, 73]</code> &rarr; <code>[1, 1, 4, 2, 1, 1, 0, 0]</code>", test: "assert daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0]" },
+        { text: "A climbing week: <code>[30, 40, 50, 60]</code> &rarr; <code>[1, 1, 1, 0]</code>", test: "assert daily_temperatures([30, 40, 50, 60]) == [1, 1, 1, 0]" },
+        { text: "Strictly rising, three days: <code>[30, 60, 90]</code> &rarr; <code>[1, 1, 0]</code>", test: "assert daily_temperatures([30, 60, 90]) == [1, 1, 0]" },
+        { text: "Never warmer: <code>[90, 80, 70]</code> &rarr; <code>[0, 0, 0]</code>", test: "assert daily_temperatures([90, 80, 70]) == [0, 0, 0]" },
+        { text: "One day: <code>[55]</code> &rarr; <code>[0]</code>", test: "assert daily_temperatures([55]) == [0]" }
+      ],
       solution: `# answer[i] = days until a strictly warmer day, or 0 if none comes.
 def daily_temperatures(temps):
     answer = [0] * len(temps)

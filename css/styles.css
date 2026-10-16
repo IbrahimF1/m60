@@ -607,7 +607,7 @@ ol.toc-list { list-style: none; margin: 0; padding: 0; }
 
 .chip:hover { background: var(--ink-10); color: var(--ink); }
 
-/* Toolbar: Run / Reset / status. */
+/* Toolbar: Run / Reset / status, full width above the split. */
 .sp-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -620,20 +620,26 @@ ol.toc-list { list-style: none; margin: 0; padding: 0; }
 .sp-status.is-ok { color: var(--ink); }
 .sp-status.is-err { color: var(--err); }
 
-/* Editor | preview split, one hairline between. */
+/* Work column (editor over output) and the task rail, one hairline between. */
 .sp-main {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 288px;
   border-top: 1px solid var(--ink-05);
 }
 
-.sp-editor-wrap {
-  position: relative;
-  min-height: 320px;
-  border-right: 1px solid var(--ink-05);
-}
+.sp-main.sp-solo { grid-template-columns: minmax(0, 1fr); }
 
-.sp-preview-wrap { position: relative; min-height: 320px; background: var(--white); }
+.sp-main.sp-solo .sp-work { border-right: 0; }
+
+.sp-work { min-width: 0; border-right: 1px solid var(--ink-05); }
+
+.sp-editor-wrap { position: relative; height: 340px; }
+
+.sp-out { border-top: 1px solid var(--ink-05); }
+
+.sp-out-head { padding: 16px 24px 10px; }
+
+.sp-preview-wrap { position: relative; height: 260px; background: var(--white); }
 
 .sp-preview-wrap iframe {
   display: block;
@@ -642,6 +648,126 @@ ol.toc-list { list-style: none; margin: 0; padding: 0; }
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+/* Task rail: SQLBolt's numbered checklist, in this site's voice. */
+.sp-tasks {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px 24px;
+}
+
+.sp-tasks-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sp-tasks-count {
+  font-size: 15px;
+  letter-spacing: var(--track);
+  color: var(--ink-50);
+  font-variant-numeric: tabular-nums;
+}
+
+ol.task-list { list-style: none; margin: 12px 0 0; padding: 0; }
+
+.task {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 16px;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--ink-05);
+}
+
+.task:first-child { border-top: 0; }
+
+.task-num {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-20);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--speed);
+}
+
+.task-text {
+  font-size: 16px;
+  line-height: 1.45;
+  letter-spacing: var(--track);
+  color: var(--ink-59);
+  transition: color var(--speed);
+}
+
+.task-text code { font-size: .85em; background: var(--ink-05); border-radius: 6px; padding: 1px 5px; }
+
+.task.is-active .task-text { color: var(--ink); }
+
+.task.is-active .task-num { color: var(--ink-50); }
+
+.task.is-done .task-num,
+.task.is-done .task-text { opacity: .45; }
+
+.task-check { font-size: 15px; line-height: 1.5; text-align: right; color: var(--ink); }
+
+.task-error {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--err);
+}
+
+/* Stuck? disclosure: the rail's version of details.solution. */
+details.task-help { margin: 18px 0 24px; }
+
+details.task-help summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 15px;
+  letter-spacing: var(--track);
+  color: var(--ink-50);
+  transition: color var(--speed);
+}
+
+details.task-help summary::-webkit-details-marker { display: none; }
+details.task-help summary::before { content: "+ "; }
+details[open].task-help summary::before { content: "- "; }
+
+details.task-help summary:hover { color: var(--ink); }
+
+details[open].task-help > summary { color: var(--ink); }
+
+.task-help-body { margin-top: 12px; }
+.task-help-body .label { display: block; margin-bottom: 6px; }
+
+.task-help-code {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  tab-size: 4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--ink-02);
+  border-radius: var(--r-media);
+  padding: 12px 14px;
+}
+
+.task-help-code code { background: none; padding: 0; font-size: inherit; }
+
+/* The continue gate: a muted pill until every task is green. */
+.sp-continue { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--ink-05); }
+
+.sp-continue-hint { margin-bottom: 10px; }
+
+.sp-continue-link { width: 100%; }
+
+.sp-continue-link[aria-disabled="true"],
+.sp-continue-link[aria-disabled="true"]:hover {
+  background: var(--ink-02);
+  color: var(--ink-20);
+  cursor: default;
 }
 
 /* CodeMirror theme "lp": paper editor, ink cursor. */
@@ -982,7 +1108,11 @@ details.solution pre code { background: none; padding: 0; }
   .doc-chips { padding: 16px 20px 0; }
   .sp-toolbar { padding: 16px 20px; }
   .sp-main { grid-template-columns: minmax(0, 1fr); }
-  .sp-editor-wrap { border-right: 0; border-bottom: 1px solid var(--ink-05); }
+  .sp-work { border-right: 0; }
+  .sp-editor-wrap { height: 300px; }
+  .sp-out-head { padding: 14px 20px 8px; }
+  .sp-preview-wrap { height: 220px; }
+  .sp-tasks { border-top: 1px solid var(--ink-05); padding: 18px 20px 24px; }
   details.solution summary { padding: 16px 20px; }
   details.solution pre { margin: 0 20px 24px; }
 
@@ -1026,6 +1156,8 @@ details.solution pre code { background: none; padding: 0; }
   .wordmark-top,
   .dock,
   .sp-toolbar,
+  .sp-out,
+  .sp-tasks,
   .mark-done,
   .footer-blur,
   .footer-fade,
@@ -1035,7 +1167,7 @@ details.solution pre code { background: none; padding: 0; }
   .layout { display: block; padding: 0; }
   .body, .exercise-prompt { max-width: none; }
   .sp-main { grid-template-columns: minmax(0, 1fr); }
-  .sp-editor-wrap { border-right: 0; }
+  .sp-work { border-right: 0; }
   .exercise, .body pre, .callout, .fig { break-inside: avoid; }
   body { background: #fff; }
 }
