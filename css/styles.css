@@ -705,8 +705,7 @@ ol.task-list { list-style: none; margin: 12px 0 0; padding: 0; }
 
 .task.is-active .task-num { color: var(--ink-50); }
 
-.task.is-done .task-num,
-.task.is-done .task-text { opacity: .45; }
+/* A passed task keeps full contrast while under review; its check marks it. */
 
 .task-check { font-size: 15px; line-height: 1.5; text-align: right; color: var(--ink); }
 
@@ -718,6 +717,152 @@ ol.task-list { list-style: none; margin: 12px 0 0; padding: 0; }
   letter-spacing: 0;
   color: var(--err);
 }
+
+/* The rail steps: arrows flank one segment per task; the bar shows what is
+ * earned and stays clickable for review. */
+.sp-step-nav { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+
+.sp-nav-btn {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-50);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: color var(--speed), background var(--speed);
+}
+
+.sp-nav-btn:hover:not(:disabled) { color: var(--ink); background: var(--ink-02); }
+
+.sp-nav-btn:disabled { color: var(--ink-10); cursor: default; }
+
+.sp-progress { display: flex; align-items: center; gap: 4px; flex: 1; }
+
+.sp-seg {
+  flex: 1;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sp-seg:disabled { cursor: default; }
+
+.sp-seg span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ink-05);
+  transition: background var(--speed);
+}
+
+.sp-seg.is-done span { background: var(--ink); }
+
+.sp-seg.is-current span { background: var(--ink-20); }
+
+.sp-seg:not(:disabled):hover span { background: var(--ink-50); }
+
+.sp-seg.is-done:not(:disabled):hover span { background: var(--ink); }
+
+.task.is-new { animation: taskIn .4s ease both; }
+
+@keyframes taskIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.task-help-hint { margin: 0 0 12px; color: var(--ink); }
+
+/* Task structure: goal text, numbered moves, an optional step diagram, then
+ * one check per row. The diagram speaks the body figure's language, scaled
+ * to the rail. */
+.task-moves { list-style: none; margin: 10px 0 0; padding: 0; counter-reset: mv; }
+
+.task-moves li {
+  position: relative;
+  padding-left: 22px;
+  margin-top: 5px;
+  font-size: 14px;
+  line-height: 1.45;
+  letter-spacing: var(--track);
+  color: var(--ink-59);
+  counter-increment: mv;
+}
+
+.task-moves li::before {
+  content: counter(mv);
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-20);
+  font-variant-numeric: tabular-nums;
+}
+
+.task-fig { margin: 12px 0 0; }
+
+.task-fig svg { display: block; width: 100%; height: auto; }
+
+.task-fig rect, .task-fig circle, .task-fig path, .task-fig line, .task-fig polygon { fill: none; stroke-width: 1.5; }
+
+.task-fig .st { stroke: var(--ink-20); }
+
+.task-fig .st-d { stroke: var(--ink-10); }
+
+.task-fig .st-k { stroke: var(--ink-50); }
+
+.task-fig .f2 { fill: var(--ink-02); }
+
+.task-fig .f5 { fill: var(--ink-05); }
+
+.task-fig .mk { fill: var(--ink-50); }
+
+.task-fig .dsh { stroke-dasharray: 3 5; }
+
+.task-fig text { fill: var(--ink-59); font-family: var(--mono); font-size: 10.5px; }
+
+.task-fig .txd { fill: var(--ink-50); }
+
+.task-fig .txs { font-size: 9.5px; }
+
+.task-checks { list-style: none; margin: 10px 0 0; padding: 0; }
+
+.task-checks li {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  column-gap: 8px;
+  row-gap: 3px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: var(--ink-02);
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-top: 4px;
+}
+
+.task-checks .tc-label {
+  font-size: 9.5px;
+  line-height: 2.1;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-20);
+}
+
+.task-checks .tc-val { min-width: 0; word-break: break-word; }
 
 /* Stuck? disclosure: the rail's version of details.solution. */
 details.task-help { margin: 18px 0 24px; }

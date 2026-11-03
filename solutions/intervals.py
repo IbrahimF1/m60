@@ -9,9 +9,14 @@ def merge(intervals):
     return merged
 
 # ---- tests ----
+assert merge([[5, 6], [1, 2], [3, 4]]) == [[1, 2], [3, 4], [5, 6]]
+assert merge([[10, 12], [1, 2]]) == [[1, 2], [10, 12]]
 assert merge([[1, 3], [2, 6], [8, 10], [15, 18]]) == [[1, 6], [8, 10], [15, 18]]
-assert merge([[1, 4], [4, 5]]) == [[1, 5]]
+assert merge([[2, 6], [1, 3]]) == [[1, 6]]
 assert merge([[1, 4], [2, 3]]) == [[1, 4]]
-assert merge([[1, 4], [0, 4]]) == [[0, 4]]
+assert merge([[1, 4], [4, 5]]) == [[1, 5]]
+assert merge([[1, 2], [2, 3], [3, 4]]) == [[1, 4]]
+assert merge([[1, 2], [2, 3], [5, 6]]) == [[1, 3], [5, 6]]
+assert merge([[2, 5]]) == [[2, 5]]
 assert merge([]) == []
 print("All tests passed!")

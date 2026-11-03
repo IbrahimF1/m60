@@ -11,9 +11,13 @@ def length_of_longest_substring(s):
     return best
 
 # ---- tests ----
-assert length_of_longest_substring("abcabcbb") == 3
-assert length_of_longest_substring("bbbbb") == 1
+assert length_of_longest_substring("abc") == 3
+assert length_of_longest_substring("abcd") == 4
 assert length_of_longest_substring("pwwkew") == 3
+assert length_of_longest_substring("abcabcbb") == 3
 assert length_of_longest_substring("dvdf") == 3
+assert length_of_longest_substring("abbc") == 2
+assert length_of_longest_substring("abba") == 2
+assert length_of_longest_substring("abcbde") == 4
 assert length_of_longest_substring("") == 0
 print("All tests passed!")

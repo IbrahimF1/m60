@@ -20,9 +20,13 @@ export const RESULT_PROBE = "__import__('json').dumps(__lp60_results__)";
  * reader of main.py could follow it, and so a user's own names cannot
  * collide with the few it introduces (all dunder-prefixed). */
 export function buildChecks(tasks) {
-  const list = (tasks || [])
-    .map((t) => "    " + JSON.stringify(String(t.test || "").trim()) + ",")
-    .join("\n");
+  /* A task carries one or more assert lines; its block passes only when
+   * every line passes, and the verdict stays one-per-task. */
+  const blocks = (tasks || []).map((t) => {
+    const list = t.tests || (t.test ? [t.test] : []);
+    return list.map((s) => String(s).trim()).join("\n");
+  });
+  const list = blocks.map((b) => "    " + JSON.stringify(b) + ",").join("\n");
   return [
     "# ---- checks (added by the page; each line must pass) ----",
     "__lp60_results__ = []",

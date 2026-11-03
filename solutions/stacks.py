@@ -10,9 +10,11 @@ def daily_temperatures(temps):
     return answer
 
 # ---- tests ----
-assert daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0]
-assert daily_temperatures([30, 40, 50, 60]) == [1, 1, 1, 0]
-assert daily_temperatures([30, 60, 90]) == [1, 1, 0]
 assert daily_temperatures([90, 80, 70]) == [0, 0, 0]
 assert daily_temperatures([55]) == [0]
+assert daily_temperatures([30, 40, 50, 60]) == [1, 1, 1, 0]
+assert daily_temperatures([50, 60, 55]) == [1, 0, 0]
+assert daily_temperatures([30, 30, 40]) == [2, 1, 0]
+assert daily_temperatures([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0]
+assert daily_temperatures([20, 15, 10, 25]) == [3, 2, 1, 0]
 print("All tests passed!")

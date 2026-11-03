@@ -13,9 +13,11 @@ def top_k_frequent(nums, k):
     return [value for count, value in sorted(heap, reverse=True)]
 
 # ---- tests ----
+assert top_k_frequent([5, 5, 5, 9, 9, 2], 3) == [5, 9, 2]
+assert top_k_frequent([6, 6, 6, 6, 2, 2, 2, 7], 3) == [6, 2, 7]
 assert top_k_frequent([1, 1, 1, 2, 2, 3], 2) == [1, 2]
-assert top_k_frequent([1], 1) == [1]
-assert top_k_frequent([1, 1, 2, 3], 2) == [1, 3]
-assert top_k_frequent([4, 4, 4, 5, 5, 6], 1) == [4]
-assert top_k_frequent([1, 2], 2) == [2, 1]
+assert top_k_frequent([2, 5, 5, 5, 9, 9], 2) == [5, 9]
+assert top_k_frequent([7, 1, 1, 3, 3, 3], 1) == [3]
+assert top_k_frequent([4, 4, 6, 6, 8, 8], 3) == [8, 6, 4]
+assert top_k_frequent([1, 1, 2, 2], 2) == [2, 1]
 print("All tests passed!")

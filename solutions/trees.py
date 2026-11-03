@@ -47,9 +47,12 @@ def level_order(root):
     return levels
 
 # ---- tests ----
-assert level_order(build_tree([3, 9, 20, None, None, 15, 7])) == [[3], [9, 20], [15, 7]]
 assert level_order(build_tree([1])) == [[1]]
-assert level_order(build_tree([1, 2, 3, 4, None, None, 5])) == [[1], [2, 3], [4, 5]]
+assert level_order(build_tree([5])) == [[5]]
+assert level_order(build_tree([1, 2, 3])) == [[1], [2, 3]]
+assert level_order(build_tree([3, 9, 20, None, None, 15, 7])) == [[3], [9, 20], [15, 7]]
+assert level_order(build_tree([1, 2, None, 3])) == [[1], [2], [3]]
+assert level_order(build_tree([1, 2, None, 3, None, 4])) == [[1], [2], [3], [4]]
 assert level_order(build_tree([])) == []
 assert level_order(None) == []
 print("All tests passed!")

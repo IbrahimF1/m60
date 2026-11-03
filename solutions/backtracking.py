@@ -16,8 +16,12 @@ def permute(nums):
     return result
 
 # ---- tests ----
-assert permute([]) == [[]]
 assert permute([1]) == [[1]]
+assert permute([7]) == [[7]]
 assert sorted(permute([1, 2])) == [[1, 2], [2, 1]]
+assert sorted(permute([5, 9])) == [[5, 9], [9, 5]]
 assert sorted(permute([1, 2, 3])) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]
+assert sorted(permute([4, 5, 6])) == [[4, 5, 6], [4, 6, 5], [5, 4, 6], [5, 6, 4], [6, 4, 5], [6, 5, 4]]
+assert permute([]) == [[]]
+assert len(permute([])) == 1
 print("All tests passed!")

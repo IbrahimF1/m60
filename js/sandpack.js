@@ -2,11 +2,13 @@
  *
  * Each practice exercise renders the SQLBolt shape in this site's language:
  * a toolbar (Run / Reset / status), the editor with its output below it in
- * the work column, and a numbered task rail on the right. Running appends
- * the hidden checks (js/checks.js) to the user's code, executes it in
- * Pyodide inside a Sandpack preview, and posts one verdict per task back;
- * the rail turns each passed task into a checked line and unlocks the
- * continue pill when the whole list is green.
+ * the work column, and a task rail on the right. Running appends the hidden
+ * checks (js/checks.js) to the user's code, executes it in Pyodide inside a
+ * Sandpack preview, and posts one verdict per task back. The rail drips:
+ * only earned tasks and the current one are ever shown, behind a progress
+ * bar, so each step builds on the code that passed the step before and no
+ * expected output is spoiled ahead of its turn. When the whole list is
+ * green, the continue pill unlocks.
  */
 
 import { composeProgram, RESULT_PROBE } from "./checks.js";
@@ -146,7 +148,10 @@ export function mountExercise(container, section, opts) {
   const ex = section.exercise;
   const options = opts || {};
   const draftKey = "lp60.code." + section.id;
-  const doneKey = "lp60.tasks." + section.id;
+  /* v2: every task list changed with the ladders, so checks earned against
+   * the old lists are void. Code drafts still match the unchanged starters
+   * and are kept. */
+  const doneKey = "lp60.v2.tasks." + section.id;
   const tasks = Array.isArray(ex.tasks) ? ex.tasks : [];
   const done = tasks.map(() => false);
 
@@ -190,9 +195,14 @@ export function mountExercise(container, section, opts) {
               '<span class="label">Tasks</span>' +
               '<span class="sp-tasks-count" data-sp-count>0/' + tasks.length + "</span>" +
             "</div>" +
+            '<div class="sp-step-nav">' +
+              '<button class="sp-nav-btn" type="button" data-sp-prev aria-label="Previous task">\u2039</button>' +
+              '<div class="sp-progress" data-sp-progress></div>' +
+              '<button class="sp-nav-btn" type="button" data-sp-next aria-label="Next task">\u203A</button>' +
+            "</div>" +
             '<ol class="task-list" data-sp-list></ol>' +
             '<details class="task-help">' +
-              '<summary>Stuck? Read this task\'s solution.</summary>' +
+              '<summary>Stuck? Get a hint.</summary>' +
               '<div class="task-help-body" data-sp-help></div>' +
             "</details>" +
             continueBlock +
@@ -207,51 +217,102 @@ export function mountExercise(container, section, opts) {
   const resetBtn = container.querySelector(".sp-reset");
   const listEl = container.querySelector("[data-sp-list]");
   const countEl = container.querySelector("[data-sp-count]");
+  const progressEl = container.querySelector("[data-sp-progress]");
+  const prevBtn = container.querySelector("[data-sp-prev]");
+  const nextBtn = container.querySelector("[data-sp-next]");
   const helpEl = container.querySelector("[data-sp-help]");
   const helpWrap = container.querySelector(".task-help");
   const goEl = container.querySelector("[data-sp-go]");
 
-  /* --- task rail ------------------------------------------------------- */
+  /* --- task rail -------------------------------------------------------
+   * The rail drips and steps: a completed task's description collapses out
+   * of view and only one task stands open at a time. Earned tasks stay
+   * reviewable by stepping with the arrows or clicking a segment of the
+   * progress bar; nothing ahead of the current task is ever shown. */
 
   function activeIndex() {
     for (let i = 0; i < done.length; i++) if (!done[i]) return i;
     return -1;
   }
 
+  let prevActive = -2;
+  let viewIndex = -1;
+  let lastResults = null;
+
   function renderTasks(latest) {
+    lastResults = latest;
     const active = activeIndex();
     const passed = done.filter(Boolean).length;
+    const freshTask = active >= 0 && active > prevActive;   /* just unlocked */
+    const wasAllDone = prevActive === -1;
+    prevActive = active;
+    const maxView = active < 0 ? tasks.length - 1 : active;
+    if (viewIndex === -1) viewIndex = active < 0 ? tasks.length - 1 : active;
+    if (freshTask) viewIndex = active;
+    if (active === -1 && !wasAllDone) viewIndex = tasks.length - 1;   /* finish on the last step */
+    viewIndex = Math.max(0, Math.min(viewIndex, maxView));
 
-    if (listEl) {
-      listEl.innerHTML = tasks.map((t, i) => {
-        const isDone = done[i];
-        const cls = "task" + (isDone ? " is-done" : "") + (i === active ? " is-active" : "");
-        const failedNow = latest && latest[i] !== null && !isDone;
-        return '<li class="' + cls + '" data-task="' + i + '">' +
-          '<span class="task-num">' + String(i + 1).padStart(2, "0") + "</span>" +
-          '<span class="task-text">' + (t.text || "") +
-            (failedNow ? '<span class="task-error">' + escHtml(latest[i]) + "</span>" : "") +
-          "</span>" +
-          '<span class="task-check"' + (isDone ? ' role="img" aria-label="passed"' : ' aria-hidden="true"') + ">" +
-            (isDone ? "\u2713" : "") +
-          "</span>" +
-        "</li>";
-      }).join("");
+    const viewed = tasks[viewIndex];
+    if (listEl && viewed) {
+      const isDone = done[viewIndex];
+      const cls = "task" + (isDone ? " is-done" : "") +
+        (viewIndex === active ? " is-active" + (freshTask ? " is-new" : "") : "");
+      const failedNow = latest && latest[viewIndex] !== null && !isDone;
+      const movesHtml = (viewed.moves && viewed.moves.length)
+        ? '<ol class="task-moves">' + viewed.moves.map((m) => "<li>" + escHtml(m) + "</li>").join("") + "</ol>"
+        : "";
+      const figHtml = viewed.diagram ? '<div class="task-fig">' + viewed.diagram + "</div>" : "";
+      const checksHtml = (viewed.checks && viewed.checks.length)
+        ? '<ul class="task-checks">' + viewed.checks.map((c) => {
+            const ci = c && typeof c === "object" ? c.input : c;
+            const co = c && typeof c === "object" ? c.output : "";
+            return '<li><span class="tc-label">Input</span>' +
+              '<span class="tc-val">' + escHtml(ci == null ? "" : ci) + "</span>" +
+              (co != null && co !== ""
+                ? '<span class="tc-label">Output</span><span class="tc-val">' + escHtml(co) + "</span>"
+                : "") +
+              "</li>";
+          }).join("") + "</ul>"
+        : "";
+      listEl.innerHTML = '<li class="' + cls + '" data-task="' + viewIndex + '">' +
+        '<span class="task-num">' + String(viewIndex + 1).padStart(2, "0") + "</span>" +
+        '<span class="task-text">' + (viewed.text || "") + movesHtml + figHtml + checksHtml +
+          (failedNow ? '<span class="task-error">' + escHtml(latest[viewIndex]) + "</span>" : "") +
+        "</span>" +
+        '<span class="task-check"' + (isDone ? ' role="img" aria-label="passed"' : ' aria-hidden="true"') + ">" +
+          (isDone ? "\u2713" : "") +
+        "</span>" +
+      "</li>";
     }
 
     if (countEl) countEl.textContent = passed + "/" + tasks.length;
 
-    if (helpEl && helpWrap) {
-      if (active < 0) {
-        helpWrap.querySelector("summary").textContent = "All tasks pass.";
-        helpEl.innerHTML = "";
-        helpWrap.removeAttribute("open");
-      } else {
-        helpWrap.querySelector("summary").textContent = "Stuck? Read this task\u2019s solution.";
-        helpEl.innerHTML =
-          '<span class="label">Task ' + String(active + 1).padStart(2, "0") + " expects</span>" +
-          '<pre class="task-help-code"><code>' + escHtml(tasks[active].test) + "</code></pre>";
-      }
+    if (progressEl) {
+      /* One segment per task: filled when earned, half for the current one,
+       * empty and inert for everything still ahead. */
+      progressEl.innerHTML = tasks.map((_, i) => {
+        const reachable = i <= maxView;
+        return '<button type="button" class="sp-seg' +
+          (done[i] ? " is-done" : "") + (i === active ? " is-current" : "") +
+          '" data-seg="' + i + '"' + (reachable ? "" : ' disabled aria-disabled="true"') +
+          ' aria-label="Task ' + (i + 1) + '"><span></span></button>';
+      }).join("");
+    }
+
+    if (prevBtn) prevBtn.disabled = viewIndex <= 0;
+    if (nextBtn) nextBtn.disabled = viewIndex >= maxView;
+
+    const shown = tasks[viewIndex];
+    if (helpEl && helpWrap && shown) {
+      helpWrap.querySelector("summary").textContent = "Stuck? Get a hint.";
+      const shownTests = shown.tests || (shown.test ? [shown.test] : []);
+      helpEl.innerHTML =
+        (shown.hint
+          ? '<span class="label">Hint for task ' + String(viewIndex + 1).padStart(2, "0") + "</span>" +
+            '<p class="task-help-hint">' + escHtml(shown.hint) + "</p>"
+          : "") +
+        '<span class="label">The check this task must pass</span>' +
+        '<pre class="task-help-code"><code>' + escHtml(shownTests.join("\n")) + "</code></pre>";
     }
 
     if (goEl) {
@@ -262,6 +323,28 @@ export function mountExercise(container, section, opts) {
       else goEl.setAttribute("aria-disabled", "true");
     }
   }
+
+  /* Step through reviewable tasks: arrows move one, a bar segment jumps. */
+  function stepView(delta) {
+    const active = activeIndex();
+    const maxView = active < 0 ? tasks.length - 1 : active;
+    const from = viewIndex < 0 ? maxView : viewIndex;
+    viewIndex = Math.max(0, Math.min(from + delta, maxView));
+    renderTasks(lastResults);
+  }
+
+  if (prevBtn) prevBtn.addEventListener("click", () => stepView(-1));
+  if (nextBtn) nextBtn.addEventListener("click", () => stepView(1));
+  if (progressEl) progressEl.addEventListener("click", (ev) => {
+    const seg = ev.target.closest ? ev.target.closest("[data-seg]") : null;
+    if (!seg || seg.disabled) return;
+    const i = Number(seg.getAttribute("data-seg"));
+    const active = activeIndex();
+    const maxView = active < 0 ? tasks.length - 1 : active;
+    if (!Number.isInteger(i) || i > maxView) return;
+    viewIndex = i;
+    renderTasks(lastResults);
+  });
 
   if (goEl) {
     goEl.addEventListener("click", (ev) => {

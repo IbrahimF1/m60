@@ -41,9 +41,10 @@ def reorder_list(head):
     return head
 
 # ---- tests ----
+assert to_list(reorder_list(build_list([1, 2, 3]))) == [1, 3, 2]
+assert to_list(reorder_list(build_list([1, 2]))) == [1, 2]
 assert to_list(reorder_list(build_list([1, 2, 3, 4]))) == [1, 4, 2, 3]
 assert to_list(reorder_list(build_list([1, 2, 3, 4, 5]))) == [1, 5, 2, 4, 3]
-assert to_list(reorder_list(build_list([1, 2]))) == [1, 2]
-assert to_list(reorder_list(build_list([1]))) == [1]
-assert to_list(reorder_list(build_list([]))) == []
+assert to_list(reorder_list(build_list([1, 2, 3, 4, 5, 6, 7]))) == [1, 7, 2, 6, 3, 5, 4]
+assert to_list(reorder_list(build_list([1]))) == [1] and to_list(reorder_list(build_list([]))) == []
 print("All tests passed!")

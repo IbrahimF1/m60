@@ -7,9 +7,12 @@ def unique_paths(m, n):
 
 
 # ---- tests ----
-assert unique_paths(3, 7) == 28
-assert unique_paths(3, 2) == 3
-assert unique_paths(3, 3) == 6
+assert unique_paths(1, 4) == 1
+assert unique_paths(5, 1) == 1
 assert unique_paths(1, 1) == 1
 assert unique_paths(2, 2) == 2
+assert unique_paths(3, 2) == 3
+assert unique_paths(2, 3) == 3
+assert unique_paths(3, 7) == 28
+assert unique_paths(3, 3) == 6
 print("All tests passed!")

@@ -15,9 +15,11 @@ def longest_palindrome(s):
 
 
 # ---- tests ----
-assert longest_palindrome("babad") in ("bab", "aba")
-assert longest_palindrome("cbbd") == "bb"
-assert longest_palindrome("bananas") == "anana"
 assert longest_palindrome("a") == "a"
+assert longest_palindrome("z") == "z"
+assert longest_palindrome("babad") in ("bab", "aba")
+assert longest_palindrome("xabay") == "aba"
+assert longest_palindrome("cbbd") == "bb"
+assert longest_palindrome("abba") == "abba"
 assert longest_palindrome("") == ""
 print("All tests passed!")

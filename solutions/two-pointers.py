@@ -12,8 +12,13 @@ def two_sum(numbers, target):
     return []
 
 # ---- tests ----
-assert two_sum([2, 7, 11, 15], 9) == [1, 2]
+assert two_sum([1, 2, 3, 4], 5) == [1, 4]
 assert two_sum([2, 3, 4], 6) == [1, 3]
-assert two_sum([-1, 0], -1) == [1, 2]
-assert two_sum([1, 2, 3, 4, 4, 9, 56, 90], 8) == [4, 5]
+assert two_sum([1, 2], 3) == [1, 2]
+assert two_sum([2, 7, 11, 15], 9) == [1, 2]
+assert two_sum([2, 3, 5, 8, 10], 11) == [2, 4]
+assert two_sum([-5, -3, 0, 4, 8], 1) == [2, 4]
+assert two_sum([1, 1, 2, 7], 2) == [1, 2]
+assert two_sum([-2, -2, 0, 1], -4) == [1, 2]
+assert two_sum([3, 3, 4, 5], 6) == [1, 2]
 print("All tests passed!")
