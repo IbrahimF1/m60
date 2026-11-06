@@ -37,7 +37,7 @@ def level_order(root):
 <p class="callout complexity"><strong>Complexity:</strong> O(n) time: every node enters and leaves the queue once; O(w) space for the queue, where w is the widest level and O(n) in the worst case, plus the output.</p>`,
     exercise: {
       title: "Binary Tree Level Order Traversal",
-      prompt: `Given the root of a binary tree, return its level order traversal: a list of levels, each level listing node values from left to right. Use <a href="https://docs.python.org/3/library/collections.html#collections.deque"><code>collections.deque</code></a> and freeze the queue length so one outer loop iteration handles one level. The <code>TreeNode</code> class and <code>build_tree</code> helper are provided.`,
+      prompt: `Given the root of a binary tree, return its level order traversal: a list of levels, each level listing node values from left to right. A queue from <a href="https://docs.python.org/3/library/collections.html#collections.deque"><code>collections.deque</code></a> hands you the next node in one step. The <code>TreeNode</code> class and <code>build_tree</code> helper are provided.`,
       leetcode: "https://leetcode.com/problems/binary-tree-level-order-traversal/",
       docs: [
         { text: "collections.deque", url: "https://docs.python.org/3/library/collections.html#collections.deque" },
@@ -80,11 +80,11 @@ def level_order(root):
     pass  # TODO: your turn
 `,
       tasks: [
-        { text: "<strong>Get the shape right on a one-level tree.</strong> The result is a list of levels, so even a lone root comes back inside another list.",
+        { text: "<strong>One node is one level.</strong> A tree with only a root has a single level holding a single value. Return a list of levels: one inner list around the root value.",
           moves: [
-            "Collect the root value",
-            "Wrap it in one level list",
-            "Return the list of levels, never a flat list"
+            "Return one inner list holding just root.val",
+            "Try it on a tree built from 1 and from 5",
+            "A flat list of the value alone would be wrong"
           ],
           checks: [
             { input: "[1]", output: "[[1]]" },
@@ -95,54 +95,70 @@ def level_order(root):
             "assert level_order(build_tree([1])) == [[1]]",
             "assert level_order(build_tree([5])) == [[5]]"
           ],
-          hint: "Returning a flat [1] instead of [[1]] is the first shape mistake; levels are always lists." },
-        { text: "<strong>Cut a tree with full levels into rows by width.</strong> When every level except the deepest is full, the rows are slices of widths 1, 2, 4, 8 over one breadth-first walk.",
+          hint: "The answer is a list of levels and every level is a list, so one node still comes back as a list inside a list." },
+        { text: "<strong>Add the children as a second level.</strong> The root sits on level one. Its left and right children, when they exist, sit on level two, so read them straight off the root.",
           moves: [
-            "Walk the tree breadth first into one flat list",
-            "Slice the list at widths 1, 2, 4, 8",
-            "Append each slice as a level"
+            "Start the answer with one level holding root.val",
+            "Add root.left.val and root.right.val when they exist",
+            "Skip the second level when the root has no children"
           ],
           checks: [
             { input: "[1,2,3]", output: "[[1],[2,3]]" },
-            { input: "[3,9,20,null,null,15,7]", output: "[[3],[9,20],[15,7]]" }
+            { input: "[1,null,2]", output: "[[1],[2]]" }
           ],
-          diagram: `<svg viewBox="0 0 232 66" aria-hidden="true" focusable="false"><g><line x1="116" y1="26" x2="90" y2="38" class="st-d"/><line x1="116" y1="26" x2="142" y2="38" class="st-d"/><circle cx="116" cy="16" r="12" class="st f2"/><text x="116" y="17" text-anchor="middle" dominant-baseline="central">1</text><circle cx="86" cy="46" r="12" class="st f2"/><text x="86" y="47" text-anchor="middle" dominant-baseline="central">2</text><circle cx="146" cy="46" r="12" class="st f2"/><text x="146" y="47" text-anchor="middle" dominant-baseline="central">3</text><text x="196" y="61" text-anchor="middle" dominant-baseline="central" class="txd txs">widths 1, 2</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><line x1="111" y1="20" x2="93" y2="33" class="st-d"/><line x1="121" y1="20" x2="139" y2="33" class="st-d"/><circle cx="116" cy="12" r="10" class="st f2"/><text x="116" y="13" text-anchor="middle" dominant-baseline="central">1</text><circle cx="86" cy="42" r="10" class="st f5"/><text x="86" y="43" text-anchor="middle" dominant-baseline="central">2</text><circle cx="146" cy="42" r="10" class="st f5"/><text x="146" y="43" text-anchor="middle" dominant-baseline="central">3</text><text x="196" y="27" text-anchor="middle" dominant-baseline="central" class="txd txs">root,</text><text x="196" y="39" text-anchor="middle" dominant-baseline="central" class="txd txs">children</text></g></svg>`,
           tests: [
             "assert level_order(build_tree([1, 2, 3])) == [[1], [2, 3]]",
-            "assert level_order(build_tree([3, 9, 20, None, None, 15, 7])) == [[3], [9, 20], [15, 7]]"
+            "assert level_order(build_tree([1, None, 2])) == [[1], [2]]"
           ],
-          hint: "Powers of two match a tree whose internal levels are full; the next task is the tree where they stop matching." },
-        { text: "<strong>Freeze the queue length instead of assuming full levels.</strong> When a level is missing children, its real width is what the queue holds at that moment, not the next power of two.",
+          hint: "Two if statements cover root.left and root.right; collect the values that exist into a second list." },
+        { text: "<strong>Reach any depth with a queue walk.</strong> Grandchildren exist too, and reading levels by hand cannot go on forever. Walk the tree with a queue: pop a node, save its value, push its children. Then cut the walk into rows of 1, 2, 4, 8 values, which is right while every level is full.",
           moves: [
-            "Read len(queue) before draining the level",
-            "Pop exactly that many nodes into one level",
-            "Append children during the sweep; they wait for the next round"
+            "Pop nodes from the front of a deque and save each value",
+            "Push every child that exists onto the back",
+            "Slice the flat value list into rows of 1, then 2, then 4 values"
+          ],
+          checks: [
+            { input: "[3,9,20,15,7]", output: "[[3],[9,20],[15,7]]" },
+            { input: "[1,2,3,4,5,6,7]", output: "[[1],[2,3],[4,5,6,7]]" }
+          ],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><circle cx="116" cy="10" r="9" class="st f2"/><text x="116" y="11" text-anchor="middle" dominant-baseline="central">1</text><circle cx="86" cy="30" r="9" class="st f5"/><text x="86" y="31" text-anchor="middle" dominant-baseline="central">2</text><circle cx="146" cy="30" r="9" class="st f5"/><text x="146" y="31" text-anchor="middle" dominant-baseline="central">3</text><circle cx="71" cy="50" r="7" class="st f5"/><circle cx="101" cy="50" r="7" class="st f5"/><circle cx="131" cy="50" r="7" class="st f5"/><circle cx="161" cy="50" r="7" class="st f5"/><text x="200" y="24" text-anchor="middle" dominant-baseline="central" class="txd txs">full rows:</text><text x="200" y="36" text-anchor="middle" dominant-baseline="central" class="txd txs">1, 2, 4</text></g></svg>`,
+          tests: [
+            "assert level_order(build_tree([3, 9, 20, 15, 7])) == [[3], [9, 20], [15, 7]]",
+            "assert level_order(build_tree([1, 2, 3, 4, 5, 6, 7])) == [[1], [2, 3], [4, 5, 6, 7]]"
+          ],
+          hint: "Children pushed while you drain one row come out on later rows, so the flat walk still visits every node in order." },
+        { text: "<strong>Ask the queue how wide the level really is.</strong> When a node is missing a child, the next level is not twice as wide. Before draining each level, read the queue's length: exactly that many nodes belong to it.",
+          moves: [
+            "Before each level, save the queue's length as its width",
+            "Pop exactly that many nodes into the current level",
+            "Children pushed during the sweep wait for the next round"
           ],
           checks: [
             { input: "[1,2,null,3]", output: "[[1],[2],[3]]" },
-            { input: "[1,2,null,3,null,4]", output: "[[1],[2],[3],[4]]" }
+            { input: "[1,null,2,null,3]", output: "[[1],[2],[3]]" }
           ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><defs><marker id="ar-tr-3" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><circle cx="40" cy="20" r="11" class="st f2"/><text x="40" y="21" text-anchor="middle" dominant-baseline="central">1</text><path d="M53 23 L87 23" class="st-k" marker-end="url(#ar-tr-3)"/><circle cx="104" cy="20" r="11" class="st f2"/><text x="104" y="21" text-anchor="middle" dominant-baseline="central">2</text><path d="M117 23 L151 23" class="st-k" marker-end="url(#ar-tr-3)"/><circle cx="168" cy="20" r="11" class="st f2"/><text x="168" y="21" text-anchor="middle" dominant-baseline="central">3</text><line x1="40" y1="38" x2="40" y2="46" class="st-d dsh"/><line x1="34" y1="46" x2="46" y2="46" class="st-d dsh"/><line x1="104" y1="38" x2="104" y2="46" class="st-d dsh"/><line x1="98" y1="46" x2="110" y2="46" class="st-d dsh"/><line x1="168" y1="38" x2="168" y2="46" class="st-d dsh"/><line x1="162" y1="46" x2="174" y2="46" class="st-d dsh"/><text x="116" y="58" text-anchor="middle" dominant-baseline="central" class="txd txs">one node per level, no holes assumed</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-tr-4" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><circle cx="40" cy="18" r="11" class="st f2"/><text x="40" y="19" text-anchor="middle" dominant-baseline="central">1</text><path d="M53 21 L87 21" class="st-k" marker-end="url(#ar-tr-4)"/><circle cx="104" cy="18" r="11" class="st f2"/><text x="104" y="19" text-anchor="middle" dominant-baseline="central">2</text><path d="M117 21 L151 21" class="st-k" marker-end="url(#ar-tr-4)"/><circle cx="168" cy="18" r="11" class="st f2"/><text x="168" y="19" text-anchor="middle" dominant-baseline="central">3</text><text x="116" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">a missing child: one node per level</text></g></svg>`,
           tests: [
             "assert level_order(build_tree([1, 2, None, 3])) == [[1], [2], [3]]",
-            "assert level_order(build_tree([1, 2, None, 3, None, 4])) == [[1], [2], [3], [4]]"
+            "assert level_order(build_tree([1, None, 2, None, 3])) == [[1], [2], [3]]"
           ],
-          hint: "A slice width of 2, 4, 8 assumes the hole is not there; the queue knows how many nodes really sit on the level." },
-        { text: "<strong>Guard the empty tree before touching the queue.</strong> A deque holding None still enters the loop, and the first popleft dereferences it.",
+          hint: "for _ in range(len(queue)) freezes the width before any child is pushed; doubling widths guess wrong when children are missing." },
+        { text: "<strong>Guard the empty tree.</strong> A deque holding None still enters the loop, and the first pop crashes reading its value. Check root is None before building the queue and return an empty list.",
           moves: [
-            "Return [] when root is None, before building the queue",
+            "Return [] right away when root is None",
             "Then run the frozen-width loop as before"
           ],
           checks: [
             { input: "empty", output: "[]" },
             { input: "null root", output: "[]" }
           ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="30" y="15" width="72" height="28" rx="9" class="st dsh"/><text x="66" y="29" text-anchor="middle" dominant-baseline="central" class="txd txs">None</text><path d="M106 29 L146 29" class="st-k"/><path d="M144 24 L152 29 L144 34" class="st-k"/><rect x="158" y="15" width="56" height="28" rx="9" class="st-k f5"/><text x="186" y="29" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><text x="116" y="55" text-anchor="middle" dominant-baseline="central" class="txd txs">check before deque</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="30" y="15" width="72" height="28" rx="9" class="st dsh"/><text x="66" y="29" text-anchor="middle" dominant-baseline="central" class="txd txs">None</text><path d="M106 29 L146 29" class="st-k"/><path d="M144 24 L152 29 L144 34" class="st-k"/><rect x="158" y="15" width="56" height="28" rx="9" class="st-k f5"/><text x="186" y="29" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><text x="116" y="55" text-anchor="middle" dominant-baseline="central" class="txd txs">check before the queue</text></g></svg>`,
           tests: [
             "assert level_order(build_tree([])) == []",
             "assert level_order(None) == []"
           ],
-          hint: "The None check belongs before deque([root]); the loop itself will not save you." }
+          hint: "The None check belongs before deque([root]); once None is inside the queue, the loop will try to read its value." }
       ],
       steps: [
         `from collections import deque
@@ -175,18 +191,9 @@ def build_tree(levels):
     return root
 
 
-# Step 1: one flat depth-first walk, wrapped as a single level.
+# Step 1: one node, one level.
 def level_order(root):
-    values = []
-    stack = [root]
-    while stack:
-        node = stack.pop()
-        values.append(node.val)
-        if node.right:
-            stack.append(node.right)
-        if node.left:
-            stack.append(node.left)
-    return [values]
+    return [[root.val]]
 `,
         `from collections import deque
 
@@ -218,7 +225,49 @@ def build_tree(levels):
     return root
 
 
-# Step 2: breadth-first order, cut at widths 1, 2, 4, 8.
+# Step 2: the root's children make a second level.
+def level_order(root):
+    levels = [[root.val]]
+    kids = []
+    if root.left:
+        kids.append(root.left.val)
+    if root.right:
+        kids.append(root.right.val)
+    if kids:
+        levels.append(kids)
+    return levels
+`,
+        `from collections import deque
+
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+def build_tree(levels):
+    """Build a tree from a LeetCode-style level-order list; None is a hole."""
+    if not levels or levels[0] is None:
+        return None
+    root = TreeNode(levels[0])
+    queue = deque([root])
+    i = 1
+    while queue and i < len(levels):
+        node = queue.popleft()
+        if levels[i] is not None:
+            node.left = TreeNode(levels[i])
+            queue.append(node.left)
+        i += 1
+        if i < len(levels) and levels[i] is not None:
+            node.right = TreeNode(levels[i])
+            queue.append(node.right)
+        i += 1
+    return root
+
+
+# Step 3: a queue walk, cut into rows of 1, 2, 4, 8 values.
 def level_order(root):
     values = []
     queue = deque([root])
@@ -268,13 +317,13 @@ def build_tree(levels):
     return root
 
 
-# Step 3: freeze the queue length so one round is one real level.
+# Step 4: freeze the real width of each level.
 def level_order(root):
     levels = []
     queue = deque([root])
     while queue:
         level = []
-        for _ in range(len(queue)):
+        for _ in range(len(queue)):    # how many nodes are on this level
             node = queue.popleft()
             level.append(node.val)
             if node.left:
@@ -314,7 +363,7 @@ def build_tree(levels):
     return root
 
 
-# Step 4: guard the empty tree, then freeze each level's width.
+# Step 5: guard the empty tree, then freeze each level's width.
 def level_order(root):
     if root is None:
         return []
@@ -417,7 +466,7 @@ ${FIG.rings}
 <p class="callout complexity"><strong>Complexity:</strong> O(rows * cols) time: every cell is scanned once and flooded at most once; O(rows * cols) worst-case recursion depth, or the frontier of a BFS queue, and the marking is done in place.</p>`,
     exercise: {
       title: "Number of Islands",
-      prompt: `Given a 2-D grid where "1" is land and "0" is water, return the number of islands: maximal groups of land connected horizontally or vertically. Flood fill each unvisited island, sinking its cells to water as you mark them, and count how many times you start.`,
+      prompt: `Given a 2-D grid where "1" is land and "0" is water, return the number of islands: maximal groups of land connected up, down, left, or right, never diagonally. Each time your scan finds land that is still there, that is one more island.`,
       leetcode: "https://leetcode.com/problems/number-of-islands/",
       docs: [
         { text: "set and frozenset", url: "https://docs.python.org/3/library/stdtypes.html#set-types-set-frozenset" },
@@ -430,11 +479,11 @@ def num_islands(grid):
     pass  # TODO: your turn
 `,
       tasks: [
-        { text: "<strong>Count a lone land cell as one island.</strong> With no neighbors to join, every 1 is its own island, so the count starts as a plain tally.",
+        { text: "<strong>Count land cells when nothing touches.</strong> If no two land cells sit side by side, every single one is its own island. Walk the whole grid and tally the cells equal to 1.",
           moves: [
-            "Walk every row and column",
+            "Visit every cell with two nested for loops",
             "Add one for each cell equal to 1",
-            "Return the tally"
+            "Diagonal cells never connect, so the tally works here"
           ],
           checks: [
             { input: "1 0 / 0 0", output: "1" },
@@ -445,60 +494,62 @@ def num_islands(grid):
             "assert num_islands([[\"1\", \"0\"], [\"0\", \"0\"]]) == 1",
             "assert num_islands([[\"1\", \"0\", \"0\"], [\"0\", \"1\", \"0\"], [\"0\", \"0\", \"0\"]]) == 2"
           ],
-          hint: "This tally is only right while no two land cells touch; the next task joins them." },
-        { text: "<strong>Erase an island when you find it.</strong> Count one, then flood its connected cells to water so the scan never counts the same island twice.",
+          hint: "A plain double loop over the rows and their cells is all this needs; it is only right while no two land cells touch." },
+        { text: "<strong>Erase a strip of land once you count it.</strong> Land cells standing side by side in a row are one island. When the scan meets land, count one island and erase land to the right until water, so the scan never counts that strip again.",
           moves: [
-            "When a cell is 1, add one and start a flood from it",
-            "Flood down and right, writing 0 into each visited cell",
-            "Resume the scan: sunk cells are already water"
+            "When a cell is 1, add one island",
+            "Erase cells to the right while they are still 1",
+            "Islands that bend onto another row come later"
+          ],
+          checks: [
+            { input: "1 1 0 / 0 0 0", output: "1" },
+            { input: "1 0 1 1", output: "2" },
+            { input: "1 1 0 0 / 0 0 1 1", output: "2" }
+          ],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-gr-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="70" y="8" width="24" height="20" rx="5" class="st f5"/><text x="82" y="18" text-anchor="middle" dominant-baseline="central">1</text><rect x="98" y="8" width="24" height="20" rx="5" class="st f5"/><text x="110" y="18" text-anchor="middle" dominant-baseline="central">1</text><rect x="126" y="8" width="24" height="20" rx="5" class="st f2"/><text x="138" y="18" text-anchor="middle" dominant-baseline="central">0</text><path d="M74 44 L118 44" class="st-k" marker-end="url(#ar-gr-2)"/><text x="116" y="60" text-anchor="middle" dominant-baseline="central" class="txd txs">one strip is one island: erase it all</text></g></svg>`,
+          tests: [
+            "assert num_islands([[\"1\", \"1\", \"0\"], [\"0\", \"0\", \"0\"]]) == 1",
+            "assert num_islands([[\"1\", \"0\", \"1\", \"1\"]]) == 2",
+            "assert num_islands([[\"1\", \"1\", \"0\", \"0\"], [\"0\", \"0\", \"1\", \"1\"]]) == 2"
+          ],
+          hint: "A while loop that moves a column index forward, writing 0 over each 1 it lands on, erases the whole strip in one go." },
+        { text: "<strong>Spread down and right through connected land.</strong> Islands are not just strips: land also joins the cell below. From each counted cell, flood through land downward and to the right with a stack of cells to visit, erasing as you go.",
+          moves: [
+            "Start a stack holding the land cell you just counted",
+            "Pop a cell; skip it if it is off the grid or water",
+            "Otherwise erase it and push the cells below and right of it"
           ],
           checks: [
             { input: "1 1 0 0 / 0 1 1 0", output: "1" },
-            { input: "1 1 0 0 0 / 0 1 1 0 0 / 0 0 0 1 0", output: "2" }
+            { input: "1 0 0 / 1 1 0", output: "1" }
           ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="56" y="6" width="22" height="18" rx="4" class="st f5"/><text x="67" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="80" y="6" width="22" height="18" rx="4" class="st f5"/><text x="91" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="104" y="6" width="22" height="18" rx="4" class="st f2"/><text x="115" y="15" text-anchor="middle" dominant-baseline="central">0</text><rect x="128" y="6" width="22" height="18" rx="4" class="st f2"/><text x="139" y="15" text-anchor="middle" dominant-baseline="central">0</text><rect x="56" y="28" width="22" height="18" rx="4" class="st f2"/><text x="67" y="37" text-anchor="middle" dominant-baseline="central">0</text><rect x="80" y="28" width="22" height="18" rx="4" class="st f5"/><text x="91" y="37" text-anchor="middle" dominant-baseline="central">1</text><rect x="104" y="28" width="22" height="18" rx="4" class="st f5"/><text x="115" y="37" text-anchor="middle" dominant-baseline="central">1</text><rect x="128" y="28" width="22" height="18" rx="4" class="st f2"/><text x="139" y="37" text-anchor="middle" dominant-baseline="central">0</text><text x="164" y="22" text-anchor="start" dominant-baseline="central" class="txd txs">one flood</text><text x="164" y="40" text-anchor="start" dominant-baseline="central" class="txd txs">erases it</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="58" y="4" width="20" height="20" rx="3" class="st f5"/><text x="68" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="82" y="4" width="20" height="20" rx="3" class="st f5"/><text x="92" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="4" width="20" height="20" rx="3" class="st f2"/><text x="116" y="14" text-anchor="middle" dominant-baseline="central">0</text><rect x="130" y="4" width="20" height="20" rx="3" class="st f2"/><text x="140" y="14" text-anchor="middle" dominant-baseline="central">0</text><rect x="58" y="28" width="20" height="20" rx="3" class="st f2"/><text x="68" y="38" text-anchor="middle" dominant-baseline="central">0</text><rect x="82" y="28" width="20" height="20" rx="3" class="st f5"/><text x="92" y="38" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="28" width="20" height="20" rx="3" class="st f5"/><text x="116" y="38" text-anchor="middle" dominant-baseline="central">1</text><rect x="130" y="28" width="20" height="20" rx="3" class="st f2"/><text x="140" y="38" text-anchor="middle" dominant-baseline="central">0</text><text x="168" y="26" text-anchor="start" dominant-baseline="central" class="txd txs">spread</text><text x="168" y="38" text-anchor="start" dominant-baseline="central" class="txd txs">down and</text><text x="168" y="50" text-anchor="start" dominant-baseline="central" class="txd txs">right</text></g></svg>`,
           tests: [
             "assert num_islands([[\"1\", \"1\", \"0\", \"0\"], [\"0\", \"1\", \"1\", \"0\"]]) == 1",
-            "assert num_islands([[\"1\", \"1\", \"0\", \"0\", \"0\"], [\"0\", \"1\", \"1\", \"0\", \"0\"], [\"0\", \"0\", \"0\", \"1\", \"0\"]]) == 2"
+            "assert num_islands([[\"1\", \"0\", \"0\"], [\"1\", \"1\", \"0\"]]) == 1"
           ],
-          hint: "Marking cells is what stops the tally from counting one island once per cell." },
-        { text: "<strong>Flood all four directions.</strong> Land joins up, down, left, and right only; a diagonal touch is a different island.",
+          hint: "A plain list works as a stack: pop the last cell, check it, erase it, then push the cell below it and the cell to its right." },
+        { text: "<strong>Flood in all four directions.</strong> Land can sit above or to the left of the cell you are on, and a down-and-right flood never reaches it. Recurse up, down, left, and right, stopping at the grid edge or on water.",
           moves: [
-            "From each cell, recurse to r+1, r-1, c+1, c-1",
-            "Stop at the grid edge, water, or a cell already sunk",
-            "Never move diagonally"
+            "From each land cell, recurse to its four neighbors",
+            "Stop at a row or column outside the grid, or on water",
+            "Diagonal cells are never neighbors"
           ],
           checks: [
-            { input: "0 1 0 0 0 / 1 1 0 0 0 / 0 0 0 1 0", output: "2" },
+            { input: "0 1 0 / 1 1 0 / 0 0 0", output: "1" },
             { input: "1 0 0 / 0 1 0 / 0 0 0", output: "2" },
             { input: "11110 / 11010 / 11000 / 00000", output: "1" }
           ],
-          diagram: `<svg viewBox="0 0 232 76" aria-hidden="true" focusable="false"><g><rect x="66" y="4" width="20" height="20" rx="3" class="st dsh"/><rect x="90" y="4" width="20" height="20" rx="3" class="st f5"/><rect x="114" y="4" width="20" height="20" rx="3" class="st dsh"/><rect x="66" y="28" width="20" height="20" rx="3" class="st f5"/><rect x="90" y="28" width="20" height="20" rx="3" class="st-k f5"/><rect x="114" y="28" width="20" height="20" rx="3" class="st f5"/><rect x="66" y="52" width="20" height="20" rx="3" class="st dsh"/><rect x="90" y="52" width="20" height="20" rx="3" class="st f5"/><rect x="114" y="52" width="20" height="20" rx="3" class="st dsh"/><text x="150" y="34" text-anchor="start" dominant-baseline="central" class="txd txs">four ways</text><text x="150" y="48" text-anchor="start" dominant-baseline="central" class="txd txs">no diagonals</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="70" y="4" width="18" height="18" rx="3" class="st dsh"/><rect x="92" y="4" width="18" height="18" rx="3" class="st f5"/><rect x="114" y="4" width="18" height="18" rx="3" class="st dsh"/><rect x="70" y="24" width="18" height="18" rx="3" class="st f5"/><rect x="92" y="24" width="18" height="18" rx="3" class="st-k f5"/><rect x="114" y="24" width="18" height="18" rx="3" class="st f5"/><rect x="70" y="44" width="18" height="18" rx="3" class="st dsh"/><rect x="92" y="44" width="18" height="18" rx="3" class="st f5"/><rect x="114" y="44" width="18" height="18" rx="3" class="st dsh"/><text x="150" y="33" text-anchor="start" dominant-baseline="central" class="txd txs">four ways, never diagonal</text></g></svg>`,
           tests: [
-            "assert num_islands([[\"0\", \"1\", \"0\", \"0\", \"0\"], [\"1\", \"1\", \"0\", \"0\", \"0\"], [\"0\", \"0\", \"0\", \"1\", \"0\"]]) == 2",
+            "assert num_islands([[\"0\", \"1\", \"0\"], [\"1\", \"1\", \"0\"], [\"0\", \"0\", \"0\"]]) == 1",
             "assert num_islands([[\"1\", \"0\", \"0\"], [\"0\", \"1\", \"0\"], [\"0\", \"0\", \"0\"]]) == 2",
             "assert num_islands([[\"1\", \"1\", \"1\", \"1\", \"0\"], [\"1\", \"1\", \"0\", \"1\", \"0\"], [\"1\", \"1\", \"0\", \"0\", \"0\"], [\"0\", \"0\", \"0\", \"0\", \"0\"]]) == 1"
           ],
-          hint: "A flood that only moves right and down misses land that sits up or left of the cell that reached it." },
-        { text: "<strong>Check the column against cols, not past it.</strong> A cell on the last column asks for a neighbor at c equal to cols; the bounds test must reject that index before Python raises.",
-          moves: [
-            "Reject c at or past cols in the flood's first line",
-            "Reject r at or past rows the same way",
-            "Only then read the cell"
-          ],
-          checks: [
-            { input: "1 0 1", output: "2" },
-            { input: "0 1 / 0 1", output: "1" }
-          ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="50" y="8" width="26" height="22" rx="4" class="st f2"/><text x="63" y="19" text-anchor="middle" dominant-baseline="central">1</text><rect x="80" y="8" width="26" height="22" rx="4" class="st f2"/><text x="93" y="19" text-anchor="middle" dominant-baseline="central">0</text><rect x="110" y="8" width="26" height="22" rx="4" class="st-k f5"/><text x="123" y="19" text-anchor="middle" dominant-baseline="central">1</text><text x="110" y="42" text-anchor="middle" dominant-baseline="central" class="txd txs">last column</text><path d="M140 19 L168 19" class="st-d dsh"/><text x="172" y="19" text-anchor="start" dominant-baseline="central" class="txd txs">stop</text></g></svg>`,
-          tests: [
-            "assert num_islands([[\"1\", \"0\", \"1\"]]) == 2",
-            "assert num_islands([[\"0\", \"1\"], [\"0\", \"1\"]]) == 1"
-          ],
-          hint: "Testing c past cols lets c equal cols through, so the last column's right neighbor indexes off the row." }
+          hint: "The recursive sink returns at once when r or c is outside the grid or the cell is water; then it erases the cell and calls itself four times." }
       ],
       steps: [
-        `# Step 1: tally every land cell; no two of them touch yet.
+        `# Step 1: every land cell is its own island while nothing touches.
 def num_islands(grid):
     count = 0
     for row in grid:
@@ -507,47 +558,39 @@ def num_islands(grid):
                 count += 1
     return count
 `,
-        `# Step 2: flood down and right so one island is counted once.
+        `# Step 2: count a strip once by erasing land to the right.
 def num_islands(grid):
     rows, cols = len(grid), len(grid[0])
     count = 0
-
-    def sink(r, c):
-        if r < 0 or r >= rows or c < 0 or c > cols or grid[r][c] != "1":
-            return
-        grid[r][c] = "0"
-        sink(r + 1, c)
-        sink(r, c + 1)
-
     for r in range(rows):
         for c in range(cols):
             if grid[r][c] == "1":
                 count += 1
-                sink(r, c)
+                cc = c
+                while cc < cols and grid[r][cc] == "1":
+                    grid[r][cc] = "0"      # erase the rest of the strip
+                    cc += 1
     return count
 `,
-        `# Step 3: flood in all four directions.
+        `# Step 3: flood down and right through land with a stack.
 def num_islands(grid):
     rows, cols = len(grid), len(grid[0])
     count = 0
-
-    def sink(r, c):
-        if r < 0 or r >= rows or c < 0 or c > cols or grid[r][c] != "1":
-            return
-        grid[r][c] = "0"
-        sink(r + 1, c)
-        sink(r - 1, c)
-        sink(r, c + 1)
-        sink(r, c - 1)
-
     for r in range(rows):
         for c in range(cols):
             if grid[r][c] == "1":
                 count += 1
-                sink(r, c)
+                stack = [(r, c)]
+                while stack:
+                    rr, cc = stack.pop()
+                    if rr < 0 or rr >= rows or cc < 0 or cc >= cols or grid[rr][cc] != "1":
+                        continue           # off the grid or not land
+                    grid[rr][cc] = "0"
+                    stack.append((rr + 1, cc))   # down
+                    stack.append((rr, cc + 1))   # right
     return count
 `,
-        `# Step 4: reject c equal to cols as well, then flood all four ways.
+        `# Step 4: flood in all four directions with recursion.
 def num_islands(grid):
     rows, cols = len(grid), len(grid[0])
     count = 0
@@ -636,10 +679,10 @@ def permute(nums):
     pass  # TODO: your turn
 `,
       tasks: [
-        { text: "<strong>One value has exactly one arrangement.</strong> The outer list holds every arrangement, so even a single value comes back inside another list.",
+        { text: "<strong>One value has one arrangement.</strong> The answer is a list of arrangements, so even a single value comes back wrapped in its own inner list.",
           moves: [
-            "Start with an empty result list",
-            "Add one arrangement holding the only value"
+            "Return a list holding one arrangement",
+            "That arrangement is a list with the only value in it"
           ],
           checks: [
             { input: "[1]", output: "[[1]]" },
@@ -650,11 +693,11 @@ def permute(nums):
             "assert permute([1]) == [[1]]",
             "assert permute([7]) == [[7]]"
           ],
-          hint: "The result is a list of arrangements, so a lone value still needs the inner list around it." },
-        { text: "<strong>Two values have two orders.</strong> Pick each value as the first element, then place the other one in the only remaining slot.",
+          hint: "The outer list holds every arrangement; the inner list is one arrangement. A bare 1 is not an arrangement yet." },
+        { text: "<strong>Two values, two orders.</strong> Either value can come first and the other follows it. Loop over every value, put it in front, and collect one arrangement per first pick.",
           moves: [
             "Loop over every value as the first pick",
-            "Append the other values in their given order",
+            "Put the other values after it, keeping their order",
             "Collect one arrangement per first pick"
           ],
           checks: [
@@ -666,28 +709,28 @@ def permute(nums):
             "assert sorted(permute([1, 2])) == [[1, 2], [2, 1]]",
             "assert sorted(permute([5, 9])) == [[5, 9], [9, 5]]"
           ],
-          hint: "A loop that only rotates the input gives n arrangements; the rest needs recursion on the remaining values." },
-        { text: "<strong>Hand the remaining values to a recursive call.</strong> Pick one value, recurse on the rest, and prepend the pick to every arrangement that comes back.",
+          hint: "For each value, one arrangement is that value followed by the others. Three values have six orders, and this finds only three." },
+        { text: "<strong>Let the function call itself on the leftovers.</strong> Three values have six orders, and nesting loops by hand stops scaling. Pick each value in turn, ask permute for every arrangement of the remaining values, and put your pick in front of each one.",
           moves: [
-            "Base case: one value left returns one arrangement",
-            "For each index, recurse on the list without that index",
-            "Prepend the picked value to each returned arrangement"
+            "If one value is left, it has a single arrangement",
+            "For each index, call permute on the list without it",
+            "Put the picked value in front of every arrangement returned"
           ],
           checks: [
             { input: "[1,2,3]", output: "123 132 213 231 312 321" },
             { input: "[4,5,6]", output: "456 465 546 564 645 654" }
           ],
-          diagram: `<svg viewBox="0 0 232 70" aria-hidden="true" focusable="false"><g><defs><marker id="ar-bt-3" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><text x="116" y="10" text-anchor="middle" dominant-baseline="central" class="txd txs">pick 1, 2, or 3</text><path d="M116 22 L60 42" class="st-k" marker-end="url(#ar-bt-3)"/><path d="M116 22 L116 42" class="st-k" marker-end="url(#ar-bt-3)"/><path d="M116 22 L172 42" class="st-k" marker-end="url(#ar-bt-3)"/><rect x="38" y="44" width="44" height="18" rx="6" class="st f2"/><text x="60" y="53" text-anchor="middle" dominant-baseline="central" class="txs">1</text><rect x="94" y="44" width="44" height="18" rx="6" class="st f2"/><text x="116" y="53" text-anchor="middle" dominant-baseline="central" class="txs">2</text><rect x="150" y="44" width="44" height="18" rx="6" class="st f2"/><text x="172" y="53" text-anchor="middle" dominant-baseline="central" class="txs">3</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><defs><marker id="ar-bt-3" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><text x="116" y="10" text-anchor="middle" dominant-baseline="central" class="txd txs">pick 1, 2, or 3</text><path d="M116 22 L60 42" class="st-k" marker-end="url(#ar-bt-3)"/><path d="M116 22 L116 42" class="st-k" marker-end="url(#ar-bt-3)"/><path d="M116 22 L172 42" class="st-k" marker-end="url(#ar-bt-3)"/><rect x="38" y="44" width="44" height="18" rx="6" class="st f2"/><text x="60" y="53" text-anchor="middle" dominant-baseline="central" class="txs">1</text><rect x="94" y="44" width="44" height="18" rx="6" class="st f2"/><text x="116" y="53" text-anchor="middle" dominant-baseline="central" class="txs">2</text><rect x="150" y="44" width="44" height="18" rx="6" class="st f2"/><text x="172" y="53" text-anchor="middle" dominant-baseline="central" class="txs">3</text></g></svg>`,
           tests: [
             "assert sorted(permute([1, 2, 3])) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]",
             "assert sorted(permute([4, 5, 6])) == [[4, 5, 6], [4, 6, 5], [5, 4, 6], [5, 6, 4], [6, 4, 5], [6, 5, 4]]"
           ],
-          hint: "Prepend the picked value to each arrangement of the rest; three picks times two tails is all six." },
-        { text: "<strong>An empty list still has one arrangement: the empty one.</strong> The base case is no values left, not one value left, or the loop runs zero times and returns nothing.",
+          hint: "nums[:i] + nums[i + 1:] is the list with index i removed. Three first picks, each with two tails, make all six." },
+        { text: "<strong>The empty list still has one arrangement.</strong> A list with no values has exactly one order: the empty arrangement. Save the path whenever no values remain, and share one running path: append the choice, recurse, pop it back.",
           moves: [
-            "Return a list holding one empty list when nums is empty",
-            "Let every other call recurse as before",
-            "Copy each finished path before storing it"
+            "When no values remain, save a copy of the path",
+            "Otherwise append a value, recurse on the rest, then pop it",
+            "The pop undoes the choice so the next pick starts clean"
           ],
           checks: [
             { input: "[]", output: "[[]]" }
@@ -695,9 +738,9 @@ def permute(nums):
           diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="26" y="16" width="64" height="26" rx="7" class="st dsh"/><text x="58" y="29" text-anchor="middle" dominant-baseline="central" class="txd txs">nums empty</text><path d="M96 29 L138 29" class="st-k"/><path d="M136 24 L144 29 L136 34" class="st-k"/><rect x="150" y="12" width="66" height="34" rx="7" class="st-k f5"/><text x="183" y="29" text-anchor="middle" dominant-baseline="central" class="txs">[[]]</text><text x="116" y="56" text-anchor="middle" dominant-baseline="central" class="txd txs">one empty arrangement</text></g></svg>`,
           tests: [
             "assert permute([]) == [[]]",
-            "assert len(permute([])) == 1"
+            "assert sorted(permute([1, 2, 3])) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2], [3, 2, 1]]"
           ],
-          hint: "One-value base cases skip the empty list entirely; the empty path itself is the missing arrangement." }
+          hint: "A base case that waits for one value skips the empty call entirely; only a no-values base case returns the empty arrangement." }
       ],
       steps: [
         `# Step 1: one arrangement per value.
@@ -790,7 +833,7 @@ def top_k_frequent(nums, k):
 <p class="callout complexity"><strong>Complexity:</strong> O(n + m log k) time for n numbers and m distinct values: one counting pass, then m pushes whose memory is bounded by k. Space is O(m) for the counts and O(k) for the heap.</p>`,
     exercise: {
       title: "Top K Frequent Elements",
-      prompt: `Given an integer list and an integer k, return the k most frequent values, most frequent first. Count with <a href="https://docs.python.org/3/library/collections.html#collections.Counter"><code>collections.Counter</code></a>, then keep a min-heap of size k and pop whenever it grows past k.`,
+      prompt: `Given an integer list <code>nums</code> and an integer <code>k</code>, return the k most frequent values, most frequent first. Count with <a href="https://docs.python.org/3/library/collections.html#collections.Counter"><code>collections.Counter</code></a>, then work out which k values survive.`,
       leetcode: "https://leetcode.com/problems/top-k-frequent-elements/",
       docs: [
         { text: "heapq module", url: "https://docs.python.org/3/library/heapq.html" },
@@ -807,11 +850,11 @@ def top_k_frequent(nums, k):
     pass  # TODO: your turn
 `,
       tasks: [
-        { text: "<strong>With k covering every distinct value, the answer is the whole frequency table.</strong> Count each value once, then order the keys by how often they appear; no cut is needed yet.",
+        { text: "<strong>Counting is the whole job while k covers everything.</strong> If k equals the number of distinct values, nothing gets dropped. Count with Counter, then list the distinct values in the order you first met them.",
           moves: [
-            "Count every value with Counter",
-            "Sort the keys by count, largest first",
-            "Return every key"
+            "Count the values with Counter(nums)",
+            "List the distinct values in first-seen order",
+            "This holds while the most frequent value also appeared first"
           ],
           checks: [
             { input: "[5,5,5,9,9,2], k=3", output: "[5,9,2]" },
@@ -822,47 +865,69 @@ def top_k_frequent(nums, k):
             "assert top_k_frequent([5, 5, 5, 9, 9, 2], 3) == [5, 9, 2]",
             "assert top_k_frequent([6, 6, 6, 6, 2, 2, 2, 7], 3) == [6, 2, 7]"
           ],
-          hint: "Every distinct value fits here, so the only work is counting and ordering; dropping values starts next." },
-        { text: "<strong>A smaller k is a cut, not a new computation.</strong> Keep the same count order and drop everything past position k.",
+          hint: "list(Counter(nums)) hands back the distinct values in the order they first appeared." },
+        { text: "<strong>Put the most frequent first.</strong> First-seen order is not frequency order. Sort the distinct values by their counts, largest count first.",
           moves: [
             "Sort the distinct values by count, largest first",
-            "Slice the first k entries",
-            "Return those values"
+            "Use each value's count as its sort key",
+            "Return every value while k still covers them all"
+          ],
+          checks: [
+            { input: "[9,9,2,2,2,7], k=3", output: "[2,9,7]" },
+            { input: "[1,1,2], k=2", output: "[1,2]" }
+          ],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="12" y="13" text-anchor="start" dominant-baseline="central" class="txd txs">2</text><rect x="30" y="6" width="66" height="14" rx="4" class="st f5"/><text x="102" y="13" text-anchor="start" dominant-baseline="central" class="txd txs">3</text><text x="12" y="33" text-anchor="start" dominant-baseline="central" class="txd txs">9</text><rect x="30" y="26" width="44" height="14" rx="4" class="st f2"/><text x="80" y="33" text-anchor="start" dominant-baseline="central" class="txd txs">2</text><text x="12" y="53" text-anchor="start" dominant-baseline="central" class="txd txs">7</text><rect x="30" y="46" width="22" height="14" rx="4" class="st f2"/><text x="58" y="53" text-anchor="start" dominant-baseline="central" class="txd txs">1</text><text x="150" y="27" text-anchor="start" dominant-baseline="central" class="txd txs">tallest</text><text x="150" y="39" text-anchor="start" dominant-baseline="central" class="txd txs">first</text></g></svg>`,
+          tests: [
+            "assert top_k_frequent([9, 9, 2, 2, 2, 7], 3) == [2, 9, 7]",
+            "assert top_k_frequent([1, 1, 2], 2) == [1, 2]"
+          ],
+          hint: "counts.get is the function that fetches a value's count; hand it to sorted as the key with reverse=True." },
+        { text: "<strong>Pick the best, delete it, repeat.</strong> A smaller k means most values do not survive. Instead of ordering everything, repeat k times: take the value with the largest count, then delete it so the next pick is different.",
+          moves: [
+            "Repeat k times: find the value with the largest count",
+            "Append it to the answer and delete it from the counts",
+            "No sorting anywhere, just k picks"
           ],
           checks: [
             { input: "[1,1,1,2,2,3], k=2", output: "[1,2]" },
-            { input: "[2,5,5,5,9,9], k=2", output: "[5,9]" },
             { input: "[7,1,1,3,3,3], k=1", output: "[3]" }
           ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="12" y="11" text-anchor="start" dominant-baseline="central" class="txd txs">5</text><rect x="34" y="4" width="66" height="13" rx="4" class="st f5"/><text x="108" y="11" text-anchor="start" dominant-baseline="central" class="txd txs">3</text><text x="12" y="30" text-anchor="start" dominant-baseline="central" class="txd txs">9</text><rect x="34" y="23" width="44" height="13" rx="4" class="st f5"/><text x="86" y="30" text-anchor="start" dominant-baseline="central" class="txd txs">2</text><line x1="8" y1="40" x2="160" y2="40" class="st-k dsh"/><text x="168" y="40" text-anchor="start" dominant-baseline="central" class="txd txs">keep 2</text><text x="12" y="52" text-anchor="start" dominant-baseline="central" class="txd txs">2</text><rect x="34" y="45" width="22" height="13" rx="4" class="st f2 st-d"/><text x="64" y="52" text-anchor="start" dominant-baseline="central" class="txd txs">1</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="12" y="13" text-anchor="start" dominant-baseline="central" class="txd txs">1</text><rect x="30" y="6" width="66" height="14" rx="4" class="st-k f5"/><text x="102" y="13" text-anchor="start" dominant-baseline="central" class="txd txs">3</text><text x="12" y="33" text-anchor="start" dominant-baseline="central" class="txd txs">2</text><rect x="30" y="26" width="44" height="14" rx="4" class="st f2"/><text x="80" y="33" text-anchor="start" dominant-baseline="central" class="txd txs">2</text><text x="12" y="53" text-anchor="start" dominant-baseline="central" class="txd txs">3</text><rect x="30" y="46" width="22" height="14" rx="4" class="st f2"/><text x="58" y="53" text-anchor="start" dominant-baseline="central" class="txd txs">1</text><text x="148" y="21" text-anchor="start" dominant-baseline="central" class="txd txs">take 1,</text><text x="148" y="33" text-anchor="start" dominant-baseline="central" class="txd txs">remove it,</text><text x="148" y="45" text-anchor="start" dominant-baseline="central" class="txd txs">repeat</text></g></svg>`,
           tests: [
             "assert top_k_frequent([1, 1, 1, 2, 2, 3], 2) == [1, 2]",
-            "assert top_k_frequent([2, 5, 5, 5, 9, 9], 2) == [5, 9]",
             "assert top_k_frequent([7, 1, 1, 3, 3, 3], 1) == [3]"
           ],
-          hint: "Counts must decide which k survive; first appearance or value order alone gives the wrong survivors." },
-        { text: "<strong>Break equal counts with the value itself, larger first.</strong> The heap stores (count, value), so tied counts compare their second element when you sort the survivors descending.",
+          hint: "max(counts, key=counts.get) names the most frequent value left; del counts[value] removes it before the next pick." },
+        { text: "<strong>Keep a heap of only k pairs.</strong> Repeated max rescans all the counts on every pick. Push each (count, value) pair into a heap; the moment it holds more than k pairs, pop the smallest one out. Sort the survivors and keep their values.",
           moves: [
-            "Push a (count, value) tuple for each distinct value",
-            "Keep a min-heap of size k, popping whenever it grows past k",
-            "Sort the surviving tuples descending and keep the values"
+            "Push a (count, value) pair for every distinct value",
+            "Whenever the heap grows past k, pop the smallest pair",
+            "Sort the survivors, largest first, and keep their values"
           ],
           checks: [
-            { input: "[4,4,6,6,8,8], k=3", output: "[8,6,4]" },
-            { input: "[1,1,2,2], k=2", output: "[2,1]" }
+            { input: "[4,4,6,6,8,8], k=2", output: "[8,6]" },
+            { input: "[1,1,1,2,2,3], k=2", output: "[1,2]" }
           ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="12" y="12" text-anchor="start" dominant-baseline="central" class="txd txs">4</text><rect x="34" y="5" width="44" height="13" rx="4" class="st f2"/><text x="12" y="30" text-anchor="start" dominant-baseline="central" class="txd txs">6</text><rect x="34" y="23" width="44" height="13" rx="4" class="st f2"/><text x="12" y="48" text-anchor="start" dominant-baseline="central" class="txd txs">8</text><rect x="34" y="41" width="44" height="13" rx="4" class="st-k f5"/><text x="96" y="22" text-anchor="start" dominant-baseline="central" class="txd txs">all count 2</text><text x="96" y="42" text-anchor="start" dominant-baseline="central" class="txd txs">order 8, 6, 4</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="12" y="12" text-anchor="start" dominant-baseline="central" class="txd txs">4</text><rect x="34" y="5" width="44" height="13" rx="4" class="st f2"/><text x="12" y="30" text-anchor="start" dominant-baseline="central" class="txd txs">6</text><rect x="34" y="23" width="44" height="13" rx="4" class="st f2"/><text x="12" y="48" text-anchor="start" dominant-baseline="central" class="txd txs">8</text><rect x="34" y="41" width="44" height="13" rx="4" class="st-k f5"/><text x="96" y="22" text-anchor="start" dominant-baseline="central" class="txd txs">all count 2</text><text x="96" y="42" text-anchor="start" dominant-baseline="central" class="txd txs">k=2 keeps 8, 6</text></g></svg>`,
           tests: [
-            "assert top_k_frequent([4, 4, 6, 6, 8, 8], 3) == [8, 6, 4]",
-            "assert top_k_frequent([1, 1, 2, 2], 2) == [2, 1]"
+            "assert top_k_frequent([4, 4, 6, 6, 8, 8], 2) == [8, 6]",
+            "assert top_k_frequent([1, 1, 1, 2, 2, 3], 2) == [1, 2]"
           ],
-          hint: "Sorting the keys alone is stable, so ties keep their first-seen order; the tuple adds the value as a second key." }
+          hint: "The heap compares whole pairs, so among equal counts the smaller value counts as the smaller pair and leaves first." }
       ],
       steps: [
         `from collections import Counter
 
 
-# Step 1: count, then order the keys by frequency.
+# Step 1: k covers every distinct value, so list them as counted.
+def top_k_frequent(nums, k):
+    counts = Counter(nums)
+    return list(counts)
+`,
+        `from collections import Counter
+
+
+# Step 2: order the distinct values by count, largest first.
 def top_k_frequent(nums, k):
     counts = Counter(nums)
     return sorted(counts, key=counts.get, reverse=True)
@@ -870,16 +935,21 @@ def top_k_frequent(nums, k):
         `from collections import Counter
 
 
-# Step 2: order the keys by frequency and keep the first k.
+# Step 3: pick the most frequent value k times, deleting each pick.
 def top_k_frequent(nums, k):
     counts = Counter(nums)
-    return sorted(counts, key=counts.get, reverse=True)[:k]
+    result = []
+    for _ in range(k):
+        best = max(counts, key=counts.get)
+        result.append(best)
+        del counts[best]
+    return result
 `,
         `from collections import Counter
 import heapq
 
 
-# Step 3: a min-heap of (count, value) pairs keeps the best k.
+# Step 4: a min-heap of (count, value) pairs keeps only the best k.
 def top_k_frequent(nums, k):
     counts = Counter(nums)                 # value -> frequency
     heap = []                              # min-heap on count, size <= k
@@ -947,11 +1017,11 @@ def merge(intervals):
     pass  # TODO: your turn
 `,
       tasks: [
-        { text: "<strong>Put the blocks in order before you join anything.</strong> The answer must be sorted by start, and sorting first is what makes each block's only possible partner the one just before it.",
+        { text: "<strong>Put the blocks in order.</strong> The answer must come out sorted by start. When no two blocks overlap, sorting is the entire job: copy every block in order.",
           moves: [
-            "Sort the input by start, then by end",
-            "Seed the output with a copy of the first sorted block",
-            "Append every other block unchanged"
+            "Sort the intervals by start with sorted()",
+            "Copy every block into the answer unchanged",
+            "The input order does not matter; the answer order does"
           ],
           checks: [
             { input: "[5,6] [1,2] [3,4]", output: "[1,2] [3,4] [5,6]" },
@@ -962,44 +1032,28 @@ def merge(intervals):
             "assert merge([[5, 6], [1, 2], [3, 4]]) == [[1, 2], [3, 4], [5, 6]]",
             "assert merge([[10, 12], [1, 2]]) == [[1, 2], [10, 12]]"
           ],
-          hint: "The output order is part of the contract: sort before you compare neighbors, and copy the pairs into lists." },
-        { text: "<strong>Join the next block to the last one you kept.</strong> Sorted order guarantees that only the last merged block can overlap what comes next, so one comparison per interval is enough.",
+          hint: "sorted(intervals) orders pairs by first number, then second. Copy each pair as a fresh list." },
+        { text: "<strong>Join the next block to the last one you kept.</strong> Sorted order makes the last kept block the only one that can overlap what comes next. When the next block starts at or before that block's end, they cover one stretch: extend the end to the larger of the two ends.",
           moves: [
             "Compare the next start with the last kept end",
-            "On an overlap, set that end to the larger of the two ends",
-            "Otherwise append the interval as a new block"
+            "At or before it means one stretch: extend to the larger end",
+            "Otherwise append the block as a new one"
           ],
           checks: [
             { input: "[1,3] [2,6] [8,10] [15,18]", output: "[1,6] [8,10] [15,18]" },
             { input: "[2,6] [1,3]", output: "[1,6]" },
-            { input: "[1,4] [2,3]", output: "[1,4]" }
+            { input: "[1,4] [2,3]", output: "[1,4]" },
+            { input: "[1,4] [4,5]", output: "[1,5]" }
           ],
           diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="52" y="12" text-anchor="end" dominant-baseline="central" class="txd txs">[1,3]</text><rect x="82" y="5" width="44" height="13" rx="4" class="st f2"/><text x="52" y="28" text-anchor="end" dominant-baseline="central" class="txd txs">[2,6]</text><rect x="104" y="21" width="88" height="13" rx="4" class="st f2"/><text x="52" y="50" text-anchor="end" dominant-baseline="central" class="txd txs">[1,6]</text><rect x="82" y="43" width="110" height="13" rx="4" class="st-k f5"/><path d="M148 36 L148 41" class="st-k"/></g></svg>`,
           tests: [
             "assert merge([[1, 3], [2, 6], [8, 10], [15, 18]]) == [[1, 6], [8, 10], [15, 18]]",
             "assert merge([[2, 6], [1, 3]]) == [[1, 6]]",
-            "assert merge([[1, 4], [2, 3]]) == [[1, 4]]"
+            "assert merge([[1, 4], [2, 3]]) == [[1, 4]]",
+            "assert merge([[1, 4], [4, 5]]) == [[1, 5]]"
           ],
-          hint: "Compare with the last kept block, not the previous input pair: an earlier merge may already cover the newcomer." },
-        { text: "<strong>Count a shared endpoint as an overlap.</strong> [1,4] and [4,5] cover one continuous stretch, so the test is a start at or before the last end, not strictly before it.",
-          moves: [
-            "Let a start equal to the last end pass the merge test",
-            "Extend with max so a contained interval cannot shrink the block",
-            "Leave the result ordered by construction"
-          ],
-          checks: [
-            { input: "[1,4] [4,5]", output: "[1,5]" },
-            { input: "[1,2] [2,3] [3,4]", output: "[1,4]" },
-            { input: "[1,2] [2,3] [5,6]", output: "[1,3] [5,6]" }
-          ],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="52" y="12" text-anchor="end" dominant-baseline="central" class="txd txs">[1,4]</text><rect x="82" y="5" width="66" height="13" rx="4" class="st f2"/><text x="52" y="28" text-anchor="end" dominant-baseline="central" class="txd txs">[4,5]</text><rect x="148" y="21" width="22" height="13" rx="4" class="st f2"/><text x="52" y="50" text-anchor="end" dominant-baseline="central" class="txd txs">[1,5]</text><rect x="82" y="43" width="88" height="13" rx="4" class="st-k f5"/><line x1="148" y1="4" x2="148" y2="40" class="st-d dsh"/><text x="196" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">touch, join</text></g></svg>`,
-          tests: [
-            "assert merge([[1, 4], [4, 5]]) == [[1, 5]]",
-            "assert merge([[1, 2], [2, 3], [3, 4]]) == [[1, 4]]",
-            "assert merge([[1, 2], [2, 3], [5, 6]]) == [[1, 3], [5, 6]]"
-          ],
-          hint: "A strict comparison leaves touching blocks apart; the shared endpoint is the whole lesson." },
-        { text: "<strong>Start the output empty instead of seeding it with the first block.</strong> A seed has no first block to copy when the list is empty, while an empty output plus a guarded test handles every size.",
+          hint: "Compare with the last block in the answer, not the previous input pair, and extend with max so nothing shrinks." },
+        { text: "<strong>Handle an empty list without a first block.</strong> Seeding the answer with the first sorted block crashes when there is no input at all. Start the answer empty and let the loop append the first block itself.",
           moves: [
             "Drop the seed and start merged as an empty list",
             "Guard the merge with a check that merged is non-empty",
@@ -1025,29 +1079,18 @@ def merge(intervals):
         merged.append([start, end])
     return merged
 `,
-        `# Step 2: join a block when it overlaps the last kept one.
+        `# Step 2: join a block to the last kept one when they cover one stretch.
 def merge(intervals):
     ordered = sorted(intervals)
     merged = [ordered[0][:]]
     for start, end in ordered[1:]:
-        if start < merged[-1][1]:
-            merged[-1][1] = max(merged[-1][1], end)
+        if start <= merged[-1][1]:          # touches or overlaps
+            merged[-1][1] = max(merged[-1][1], end)   # reach further
         else:
-            merged.append([start, end])
+            merged.append([start, end])     # a gap: a new block
     return merged
 `,
-        `# Step 3: touching blocks merge too.
-def merge(intervals):
-    ordered = sorted(intervals)
-    merged = [ordered[0][:]]
-    for start, end in ordered[1:]:
-        if start <= merged[-1][1]:
-            merged[-1][1] = max(merged[-1][1], end)
-        else:
-            merged.append([start, end])
-    return merged
-`,
-        `# Step 4: start empty so an empty input needs no first block.
+        `# Step 3: start empty so an empty input needs no first block.
 def merge(intervals):
     merged = []
     for start, end in sorted(intervals):        # by start, then end

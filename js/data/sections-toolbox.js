@@ -52,56 +52,57 @@ for ch in 'banana':
 `,
       tasks: [
         {
-          text: "<strong>Write the three sums out by hand.</strong> Each output slot is a prefix of the input, so spelling out three additions gets the small case right before you generalize.",
+          text: "<strong>One number in, one number out.</strong> Start with the shortest list there is: one number. Nothing comes before it, so the first running sum is that number alone. Return a list holding just it.",
           moves: [
-            "Return a list with one entry per input slot",
-            "out[0] is nums[0]",
-            "out[1] adds nums[0] and nums[1]",
-            "out[2] adds all three values"
+            "Read the first number with nums[0]",
+            "Wrap it in square brackets to make a list",
+            "Return that one-item list"
           ],
-          checks: [{ input: "[1, 2, 3]", output: "[1, 3, 6]" }, { input: "[2, 2, 2]", output: "[2, 4, 6]" }],
-          diagram: `<svg viewBox="0 0 232 66" aria-hidden="true" focusable="false"><defs><marker id="ar-pc-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="38" y="6" width="28" height="20" rx="7" class="st f2"/><text x="52" y="16" text-anchor="middle" dominant-baseline="central">1</text><rect x="74" y="6" width="28" height="20" rx="7" class="st f2"/><text x="88" y="16" text-anchor="middle" dominant-baseline="central">2</text><rect x="110" y="6" width="28" height="20" rx="7" class="st f2"/><text x="124" y="16" text-anchor="middle" dominant-baseline="central">3</text><line x1="52" y1="28" x2="52" y2="35" class="st-k" marker-end="url(#ar-pc-1)"/><line x1="88" y1="28" x2="88" y2="35" class="st-k" marker-end="url(#ar-pc-1)"/><line x1="124" y1="28" x2="124" y2="35" class="st-k" marker-end="url(#ar-pc-1)"/><text x="6" y="48" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="38" y="38" width="28" height="20" rx="7" class="st f5"/><text x="52" y="48" text-anchor="middle" dominant-baseline="central">1</text><rect x="74" y="38" width="28" height="20" rx="7" class="st f5"/><text x="88" y="48" text-anchor="middle" dominant-baseline="central">3</text><rect x="110" y="38" width="28" height="20" rx="7" class="st f5"/><text x="124" y="48" text-anchor="middle" dominant-baseline="central">6</text><text x="150" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">prefix</text><text x="150" y="48" class="txd txs" text-anchor="start" dominant-baseline="central">three sums</text></g></svg>`,
+          checks: [{ input: "[7]", output: "[7]" }, { input: "[4]", output: "[4]" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-pc-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="8" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="58" y="4" width="30" height="22" rx="6" class="st f2"/><text x="73" y="15" text-anchor="middle" dominant-baseline="central">7</text><line x1="73" y1="28" x2="73" y2="36" class="st-k" marker-end="url(#ar-pc-1)"/><text x="8" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="58" y="38" width="30" height="22" rx="6" class="st f5"/><text x="73" y="49" text-anchor="middle" dominant-baseline="central">7</text><text x="102" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">one number in</text><text x="102" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">the first sum is 7</text></g></svg>`,
           tests: [
+            "assert running_sum([7]) == [7]",
+            "assert running_sum([4]) == [4]"
+          ],
+          hint: "Square brackets build a list. This stays right only while the list holds exactly one number."
+        },
+        {
+          text: "<strong>Carry the total forward.</strong> A list of any length needs one idea: each new sum is the last sum plus the next number. Start the answer with the first number, then keep adding as you walk.",
+          moves: [
+            "Start out as the list holding nums[0]",
+            "Walk the rest with for n in nums[1:]",
+            "Append out[-1] plus n to out",
+            "Return out when the walk ends"
+          ],
+          checks: [{ input: "[1, 2]", output: "[1, 3]" }, { input: "[1, 2, 3]", output: "[1, 3, 6]" }, { input: "[2, 2, 2]", output: "[2, 4, 6]" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-pc-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="8" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="46" y="4" width="28" height="22" rx="6" class="st f2"/><text x="60" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="80" y="4" width="28" height="22" rx="6" class="st f2"/><text x="94" y="15" text-anchor="middle" dominant-baseline="central">2</text><rect x="114" y="4" width="28" height="22" rx="6" class="st f2"/><text x="128" y="15" text-anchor="middle" dominant-baseline="central">3</text><line x1="60" y1="28" x2="60" y2="36" class="st-k" marker-end="url(#ar-pc-2)"/><line x1="94" y1="28" x2="94" y2="36" class="st-k" marker-end="url(#ar-pc-2)"/><line x1="128" y1="28" x2="128" y2="36" class="st-k" marker-end="url(#ar-pc-2)"/><text x="8" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="46" y="38" width="28" height="22" rx="6" class="st f5"/><text x="60" y="49" text-anchor="middle" dominant-baseline="central">1</text><rect x="80" y="38" width="28" height="22" rx="6" class="st f5"/><text x="94" y="49" text-anchor="middle" dominant-baseline="central">3</text><rect x="114" y="38" width="28" height="22" rx="6" class="st f5"/><text x="128" y="49" text-anchor="middle" dominant-baseline="central">6</text><text x="152" y="31" class="txd txs" text-anchor="start" dominant-baseline="central">1, then 1+2, then 1+2+3</text></g></svg>`,
+          tests: [
+            "assert running_sum([1, 2]) == [1, 3]",
             "assert running_sum([1, 2, 3]) == [1, 3, 6]",
             "assert running_sum([2, 2, 2]) == [2, 4, 6]"
           ],
-          hint: "Three spelled-out indexes only work while the input has exactly three entries."
+          hint: "out[-1] is the newest sum you appended. Add the next number to it and append the result."
         },
         {
-          text: "<strong>Replace the three sums with one running total.</strong> Add each value once and append the total, so the loop no longer cares how long the input is.",
+          text: "<strong>Start from zero so an empty list works.</strong> Reading nums[0] right away crashes on an empty list. Swap the start: total begins at 0 and out begins empty, and the loop never runs when there is nothing to add.",
           moves: [
-            "Start from the first value and its total",
-            "Walk the remaining values one at a time",
-            "Add each value to the total, then append the total"
-          ],
-          checks: [{ input: "[1, 2, 3, 4]", output: "[1, 3, 6, 10]" }, { input: "[2, 2, 2, 2]", output: "[2, 4, 6, 8]" }],
-          diagram: `<svg viewBox="0 0 232 60" aria-hidden="true" focusable="false"><defs><marker id="ar-pc-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="4" y="14" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="34" y="4" width="26" height="20" rx="7" class="st f2"/><text x="47" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="68" y="4" width="26" height="20" rx="7" class="st f2"/><text x="81" y="14" text-anchor="middle" dominant-baseline="central">2</text><rect x="102" y="4" width="26" height="20" rx="7" class="st f2"/><text x="115" y="14" text-anchor="middle" dominant-baseline="central">3</text><rect x="136" y="4" width="26" height="20" rx="7" class="st f2"/><text x="149" y="14" text-anchor="middle" dominant-baseline="central">4</text><line x1="47" y1="26" x2="47" y2="31" class="st-k" marker-end="url(#ar-pc-2)"/><line x1="81" y1="26" x2="81" y2="31" class="st-k" marker-end="url(#ar-pc-2)"/><line x1="115" y1="26" x2="115" y2="31" class="st-k" marker-end="url(#ar-pc-2)"/><line x1="149" y1="26" x2="149" y2="31" class="st-k" marker-end="url(#ar-pc-2)"/><text x="4" y="44" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="34" y="34" width="26" height="20" rx="7" class="st f5"/><text x="47" y="44" text-anchor="middle" dominant-baseline="central">1</text><rect x="68" y="34" width="26" height="20" rx="7" class="st f5"/><text x="81" y="44" text-anchor="middle" dominant-baseline="central">3</text><rect x="102" y="34" width="26" height="20" rx="7" class="st f5"/><text x="115" y="44" text-anchor="middle" dominant-baseline="central">6</text><rect x="136" y="34" width="26" height="20" rx="7" class="st f5"/><text x="149" y="44" text-anchor="middle" dominant-baseline="central">10</text><text x="172" y="34" class="txd txs" text-anchor="start" dominant-baseline="central">running</text><text x="172" y="48" class="txd txs" text-anchor="start" dominant-baseline="central">total</text></g></svg>`,
-          tests: [
-            "assert running_sum([1, 2, 3, 4]) == [1, 3, 6, 10]",
-            "assert running_sum([2, 2, 2, 2]) == [2, 4, 6, 8]"
-          ],
-          hint: "Do not rebuild each prefix from scratch; carry the last total forward instead."
-        },
-        {
-          text: "<strong>Guard the empty list before you read index zero.</strong> A seeded accumulator needs a first value, so return early when there is nothing to sum.",
-          moves: [
-            "Check whether nums is empty first",
-            "Return [] when it is",
-            "Leave the seeded loop for non-empty input",
-            "One value still maps to itself"
+            "Make out an empty list and total 0",
+            "Loop over every number in nums",
+            "Add each number to total, then append total",
+            "Empty input now returns [] with no crash"
           ],
           checks: [{ input: "[]", output: "[]" }, { input: "[5]", output: "[5]" }],
-          diagram: `<svg viewBox="0 0 232 64" aria-hidden="true" focusable="false"><defs><marker id="ar-pc-3" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">empty</text><rect x="52" y="6" width="44" height="20" rx="7" class="st dsh"/><text x="74" y="16" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><line x1="100" y1="16" x2="126" y2="16" class="st-k" marker-end="url(#ar-pc-3)"/><rect x="130" y="6" width="44" height="20" rx="7" class="st dsh"/><text x="152" y="16" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><text x="6" y="46" class="txd txs" text-anchor="start" dominant-baseline="central">single</text><rect x="52" y="36" width="26" height="20" rx="7" class="st f2"/><text x="65" y="46" text-anchor="middle" dominant-baseline="central">5</text><line x1="82" y1="46" x2="126" y2="46" class="st-k" marker-end="url(#ar-pc-3)"/><rect x="130" y="36" width="26" height="20" rx="7" class="st f5"/><text x="143" y="46" text-anchor="middle" dominant-baseline="central">5</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-pc-3" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="8" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="50" y="4" width="30" height="22" rx="6" class="st dsh"/><text x="65" y="15" text-anchor="middle" dominant-baseline="central">[]</text><line x1="84" y1="15" x2="102" y2="15" class="st-k" marker-end="url(#ar-pc-3)"/><text x="110" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="138" y="4" width="30" height="22" rx="6" class="st dsh"/><text x="153" y="15" text-anchor="middle" dominant-baseline="central">[]</text><text x="176" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">stays empty</text><text x="8" y="47" class="txd txs" text-anchor="start" dominant-baseline="central">one</text><rect x="50" y="36" width="30" height="22" rx="6" class="st f2"/><text x="65" y="47" text-anchor="middle" dominant-baseline="central">5</text><line x1="84" y1="47" x2="102" y2="47" class="st-k" marker-end="url(#ar-pc-3)"/><rect x="138" y="36" width="30" height="22" rx="6" class="st f5"/><text x="153" y="47" text-anchor="middle" dominant-baseline="central">5</text><text x="176" y="47" class="txd txs" text-anchor="start" dominant-baseline="central">total 0 plus 5</text></g></svg>`,
           tests: [
             "assert running_sum([]) == []",
             "assert running_sum([5]) == [5]"
           ],
-          hint: "The guard has to come before nums[0], not after the crash."
+          hint: "With total at 0 and out empty, a loop over no numbers adds nothing, so [] comes back on its own."
         }
       ],
       steps: [
         `def running_sum(nums):
-    return [nums[0], nums[0] + nums[1], nums[0] + nums[1] + nums[2]]
+    return [nums[0]]
 `,
         `def running_sum(nums):
     out = [nums[0]]
@@ -177,66 +178,66 @@ def is_anagram(s, t):
 `,
       tasks: [
         {
-          text: "<strong>Start with exact equality.</strong> The simplest answer compares the two strings character by character, which is right only when the order already matches.",
+          text: "<strong>Start with plain equality.</strong> The simplest check asks if one string is already the other one, letter for letter. That is true only when the order also matches, which makes it wrong for real anagrams.",
           moves: [
             "Compare s and t with ==",
-            "Return the boolean result",
-            "Same letters in the same order gives True"
+            "Return the result of that comparison",
+            "Identical strings pass, all else fails"
           ],
-          checks: [{ input: "s=abc t=abc", output: "True" }, { input: "s=ab t=ab", output: "True" }],
-          diagram: `<svg viewBox="0 0 232 56" aria-hidden="true" focusable="false"><g><text x="6" y="17" class="txd txs" text-anchor="start" dominant-baseline="central">s</text><rect x="24" y="6" width="24" height="22" rx="7" class="st f2"/><text x="36" y="17" text-anchor="middle" dominant-baseline="central">a</text><rect x="56" y="6" width="24" height="22" rx="7" class="st f2"/><text x="68" y="17" text-anchor="middle" dominant-baseline="central">b</text><rect x="88" y="6" width="24" height="22" rx="7" class="st f2"/><text x="100" y="17" text-anchor="middle" dominant-baseline="central">c</text><text x="120" y="17" class="txd txs" text-anchor="middle" dominant-baseline="central">=</text><text x="132" y="17" class="txd txs" text-anchor="start" dominant-baseline="central">t</text><rect x="146" y="6" width="24" height="22" rx="7" class="st f5"/><text x="158" y="17" text-anchor="middle" dominant-baseline="central">a</text><rect x="176" y="6" width="24" height="22" rx="7" class="st f5"/><text x="188" y="17" text-anchor="middle" dominant-baseline="central">b</text><rect x="206" y="6" width="24" height="22" rx="7" class="st f5"/><text x="218" y="17" text-anchor="middle" dominant-baseline="central">c</text><text x="116" y="44" class="txd txs" text-anchor="middle" dominant-baseline="central">same letters, same order</text></g></svg>`,
+          checks: [{ input: "s=cat t=cat", output: "True" }, { input: "s=a t=a", output: "True" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="6" y="19" class="txd txs" text-anchor="start" dominant-baseline="central">s</text><rect x="22" y="8" width="24" height="22" rx="6" class="st f2"/><text x="34" y="19" text-anchor="middle" dominant-baseline="central">c</text><rect x="50" y="8" width="24" height="22" rx="6" class="st f2"/><text x="62" y="19" text-anchor="middle" dominant-baseline="central">a</text><rect x="78" y="8" width="24" height="22" rx="6" class="st f2"/><text x="90" y="19" text-anchor="middle" dominant-baseline="central">t</text><text x="116" y="19" class="txd txs" text-anchor="middle" dominant-baseline="central">=</text><text x="132" y="19" class="txd txs" text-anchor="start" dominant-baseline="central">t</text><rect x="142" y="8" width="24" height="22" rx="6" class="st f5"/><text x="154" y="19" text-anchor="middle" dominant-baseline="central">c</text><rect x="170" y="8" width="24" height="22" rx="6" class="st f5"/><text x="182" y="19" text-anchor="middle" dominant-baseline="central">a</text><rect x="198" y="8" width="24" height="22" rx="6" class="st f5"/><text x="210" y="19" text-anchor="middle" dominant-baseline="central">t</text><text x="116" y="52" class="txd txs" text-anchor="middle" dominant-baseline="central">same letters in the same order</text></g></svg>`,
           tests: [
-            "assert is_anagram('abc', 'abc') is True",
-            "assert is_anagram('ab', 'ab') is True"
+            "assert is_anagram('cat', 'cat') is True",
+            "assert is_anagram('a', 'a') is True"
           ],
-          hint: "Equality is stricter than an anagram: it also demands the same order."
+          hint: "Equality also demands the same order, and an anagram is free to shuffle its letters."
         },
         {
-          text: "<strong>Ignore the order.</strong> An anagram keeps the same letters, so compare the letter sets and check that the lengths match.",
+          text: "<strong>Throw away the order.</strong> An anagram may shuffle letters, so compare the letter collections instead. Turning a string into a set keeps one copy of each letter and forgets the order.",
           moves: [
-            "Reject pairs whose lengths differ",
+            "Turn each string into a set with set()",
             "Compare set(s) with set(t)",
-            "Return True when both checks match"
+            "Return the comparison result"
           ],
-          checks: [{ input: "s=anagram t=nagaram", output: "True" }, { input: "s=ab t=ba", output: "True" }, { input: "s=abcd t=abcc", output: "False" }],
-          diagram: `<svg viewBox="0 0 232 74" aria-hidden="true" focusable="false"><defs><marker id="ar-sd-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="17" class="txd txs" text-anchor="start" dominant-baseline="central">s</text><rect x="26" y="6" width="24" height="22" rx="7" class="st f2"/><text x="38" y="17" text-anchor="middle" dominant-baseline="central">a</text><rect x="58" y="6" width="24" height="22" rx="7" class="st f2"/><text x="70" y="17" text-anchor="middle" dominant-baseline="central">b</text><text x="130" y="17" class="txd txs" text-anchor="start" dominant-baseline="central">t</text><rect x="150" y="6" width="24" height="22" rx="7" class="st f5"/><text x="162" y="17" text-anchor="middle" dominant-baseline="central">b</text><rect x="182" y="6" width="24" height="22" rx="7" class="st f5"/><text x="194" y="17" text-anchor="middle" dominant-baseline="central">a</text><path d="M38 30 C66 46 140 46 160 31" class="st-k" marker-end="url(#ar-sd-2)"/><path d="M70 30 C96 44 168 44 192 31" class="st-k" marker-end="url(#ar-sd-2)"/><text x="116" y="64" class="txd txs" text-anchor="middle" dominant-baseline="central">same letters, new order</text></g></svg>`,
+          checks: [{ input: "s=anagram t=nagaram", output: "True" }, { input: "s=ab t=ba", output: "True" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-sd-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="19" class="txd txs" text-anchor="start" dominant-baseline="central">s</text><rect x="26" y="8" width="24" height="22" rx="6" class="st f2"/><text x="38" y="19" text-anchor="middle" dominant-baseline="central">a</text><rect x="58" y="8" width="24" height="22" rx="6" class="st f2"/><text x="70" y="19" text-anchor="middle" dominant-baseline="central">b</text><text x="130" y="19" class="txd txs" text-anchor="start" dominant-baseline="central">t</text><rect x="146" y="8" width="24" height="22" rx="6" class="st f5"/><text x="158" y="19" text-anchor="middle" dominant-baseline="central">b</text><rect x="178" y="8" width="24" height="22" rx="6" class="st f5"/><text x="190" y="19" text-anchor="middle" dominant-baseline="central">a</text><path d="M38 30 C70 50 160 50 189 31" class="st-k" marker-end="url(#ar-sd-2)"/><path d="M70 30 C102 44 130 44 156 31" class="st-k" marker-end="url(#ar-sd-2)"/><text x="116" y="58" class="txd txs" text-anchor="middle" dominant-baseline="central">same letters, new order</text></g></svg>`,
           tests: [
             "assert is_anagram('anagram', 'nagaram') is True",
-            "assert is_anagram('ab', 'ba') is True",
-            "assert is_anagram('abcd', 'abcc') is False"
+            "assert is_anagram('ab', 'ba') is True"
           ],
-          hint: "Order is irrelevant now, but equal sets say nothing about how often each letter appears."
+          hint: "A set keeps one copy of each letter, so ab and ba now match. How many times each letter appears is still ignored."
         },
         {
-          text: "<strong>Count how many times each letter appears.</strong> A set comparison passes aab and abb, so compare the multiplicities instead.",
+          text: "<strong>Count how often each letter appears.</strong> Sets call aab and abb equal, but the counts differ. Tally s into a dict, subtract one for every letter of t, and the strings match only if every count lands on zero.",
           moves: [
-            "Count every character in each string",
-            "Compare the two count maps",
-            "Equal counts mean an anagram"
+            "Grow the tally with counts.get(ch, 0) + 1",
+            "Subtract 1 for each letter of t",
+            "Check all(v == 0 for v in counts.values())"
           ],
           checks: [{ input: "s=aab t=abb", output: "False" }, { input: "s=aabbcc t=abcabc", output: "True" }],
-          diagram: `<svg viewBox="0 0 232 72" aria-hidden="true" focusable="false"><g><text x="6" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">s</text><rect x="26" y="6" width="44" height="20" rx="7" class="st f2"/><text x="48" y="16" text-anchor="middle" dominant-baseline="central" class="txs">a 2</text><rect x="76" y="6" width="44" height="20" rx="7" class="st f2"/><text x="98" y="16" text-anchor="middle" dominant-baseline="central" class="txs">b 1</text><text x="136" y="29" class="txd txs" text-anchor="middle" dominant-baseline="central">!=</text><text x="6" y="44" class="txd txs" text-anchor="start" dominant-baseline="central">t</text><rect x="26" y="34" width="44" height="20" rx="7" class="st f5"/><text x="48" y="44" text-anchor="middle" dominant-baseline="central" class="txs">a 1</text><rect x="76" y="34" width="44" height="20" rx="7" class="st f5"/><text x="98" y="44" text-anchor="middle" dominant-baseline="central" class="txs">b 2</text><text x="116" y="64" class="txd txs" text-anchor="middle" dominant-baseline="central">same letters, different counts</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="6" y="13" class="txd txs" text-anchor="start" dominant-baseline="central">s</text><rect x="26" y="4" width="44" height="18" rx="6" class="st f2"/><text x="48" y="13" text-anchor="middle" dominant-baseline="central" class="txs">a 2</text><rect x="76" y="4" width="44" height="18" rx="6" class="st f2"/><text x="98" y="13" text-anchor="middle" dominant-baseline="central" class="txs">b 1</text><text x="128" y="28" class="txd txs" text-anchor="middle" dominant-baseline="central">!=</text><text x="6" y="43" class="txd txs" text-anchor="start" dominant-baseline="central">t</text><rect x="26" y="34" width="44" height="18" rx="6" class="st f5"/><text x="48" y="43" text-anchor="middle" dominant-baseline="central" class="txs">a 1</text><rect x="76" y="34" width="44" height="18" rx="6" class="st f5"/><text x="98" y="43" text-anchor="middle" dominant-baseline="central" class="txs">b 2</text><text x="116" y="58" class="txd txs" text-anchor="middle" dominant-baseline="central">same letters, different counts</text></g></svg>`,
           tests: [
             "assert is_anagram('aab', 'abb') is False",
             "assert is_anagram('aabbcc', 'abcabc') is True"
           ],
-          hint: "Equal lengths and equal sets still allow different counts; aab and abb prove it."
+          hint: "counts.get(ch, 0) starts a brand new letter at zero, so its first tally becomes one."
         },
         {
-          text: "<strong>Guard the empty and one-sided pairs.</strong> Empty counts compare equal, while a letter with no matching count must answer False instead of raising.",
+          text: "<strong>Let Counter do the tallying.</strong> The hand tally crashes the moment t holds a letter s never had. Counter(s) builds the whole tally in one call, so the test becomes one comparison and no loops.",
           moves: [
-            "Both empty: return True",
-            "One empty and one not: return False",
-            "Compare the counts for every other pair",
-            "Let Counter handle the missing key"
+            "Build Counter(s) and Counter(t)",
+            "Compare the two Counters with ==",
+            "Equal Counters mean equal letter counts",
+            "A letter only one side has simply counts zero"
           ],
-          checks: [{ input: "s=\"\" t=\"\"", output: "True" }, { input: "s=\"\" t=\"a\"", output: "False" }, { input: "s=\"aabb\" t=\"bbaa\"", output: "True" }, { input: "s=\"aabb\" t=\"abbb\"", output: "False" }],
-          diagram: `<svg viewBox="0 0 232 78" aria-hidden="true" focusable="false"><g><text x="6" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">empty</text><rect x="66" y="6" width="44" height="20" rx="7" class="st dsh"/><text x="88" y="16" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><rect x="118" y="6" width="44" height="20" rx="7" class="st dsh"/><text x="140" y="16" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><text x="186" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">True</text><text x="6" y="42" class="txd txs" text-anchor="start" dominant-baseline="central">one empty</text><rect x="66" y="32" width="44" height="20" rx="7" class="st dsh"/><text x="88" y="42" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><rect x="118" y="32" width="44" height="20" rx="7" class="st f2"/><text x="140" y="42" text-anchor="middle" dominant-baseline="central">a</text><text x="186" y="42" class="txd txs" text-anchor="start" dominant-baseline="central">False</text><text x="6" y="68" class="txd txs" text-anchor="start" dominant-baseline="central">near</text><rect x="66" y="58" width="44" height="20" rx="7" class="st f2"/><text x="88" y="68" text-anchor="middle" dominant-baseline="central" class="txs">aabb</text><rect x="118" y="58" width="44" height="20" rx="7" class="st f2"/><text x="140" y="68" text-anchor="middle" dominant-baseline="central" class="txs">abbb</text><text x="186" y="68" class="txd txs" text-anchor="start" dominant-baseline="central">False</text></g></svg>`,
+          checks: [{ input: "s=aabb t=bbaa", output: "True" }, { input: "s=aaa t=aa", output: "False" }, { input: "s=a t=ab", output: "False" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="18" y="6" width="76" height="24" rx="6" class="st f5"/><text x="56" y="18" text-anchor="middle" dominant-baseline="central" class="txs">a 2  b 1</text><text x="116" y="18" class="txd txs" text-anchor="middle" dominant-baseline="central">=</text><rect x="126" y="6" width="76" height="24" rx="6" class="st f5"/><text x="164" y="18" text-anchor="middle" dominant-baseline="central" class="txs">a 2  b 1</text><text x="56" y="42" class="txd txs" text-anchor="middle" dominant-baseline="central">Counter(s)</text><text x="164" y="42" class="txd txs" text-anchor="middle" dominant-baseline="central">Counter(t)</text><text x="116" y="58" class="txd txs" text-anchor="middle" dominant-baseline="central">one call counts every letter</text></g></svg>`,
           tests: [
-            "assert is_anagram('', '') is True and is_anagram('', 'a') is False",
-            "assert is_anagram('aabb', 'bbaa') is True and is_anagram('aabb', 'abbb') is False"
+            "assert is_anagram('aabb', 'bbaa') is True",
+            "assert is_anagram('aaa', 'aa') is False",
+            "assert is_anagram('a', 'ab') is False"
           ],
-          hint: "A hand-rolled decrement raises KeyError on a letter the first string never had."
+          hint: "Counter is already imported at the top. It reads a missing letter as a count of zero, never as an error."
         }
       ],
       steps: [
@@ -250,7 +251,7 @@ def is_anagram(s, t):
 
 
 def is_anagram(s, t):
-    return len(s) == len(t) and set(s) == set(t)
+    return set(s) == set(t)
 `,
         `from collections import Counter
 
@@ -332,70 +333,73 @@ def bad(seen=[]):               # trap: seen survives calls
 `,
       tasks: [
         {
-          text: "<strong>Use the total product and divide it out.</strong> With no zeros, every other slot is just the total divided by the value you are excluding.",
+          text: "<strong>A single number leaves nothing else to multiply.</strong> The product of an empty collection is 1, so a one-number list must answer [1]. Build the easiest thing that works: a list of ones, one slot per input number.",
           moves: [
-            "Multiply every value into one total",
-            "Divide the total by nums[i] for each i",
-            "Return the quotients in input order"
+            "Build [1] * len(nums), one slot per input",
+            "Return it",
+            "Check it on any one-number list"
+          ],
+          checks: [{ input: "[5]", output: "[1]" }, { input: "[9]", output: "[1]" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-id-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="8" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="58" y="4" width="30" height="22" rx="6" class="st f2"/><text x="73" y="15" text-anchor="middle" dominant-baseline="central">5</text><line x1="73" y1="28" x2="73" y2="36" class="st-k" marker-end="url(#ar-id-1)"/><text x="8" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="58" y="38" width="30" height="22" rx="6" class="st f5"/><text x="73" y="49" text-anchor="middle" dominant-baseline="central">1</text><text x="102" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">nothing else to multiply</text><text x="102" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">the answer is 1</text></g></svg>`,
+          tests: [
+            "assert product_except_self([5]) == [1]",
+            "assert product_except_self([9]) == [1]"
+          ],
+          hint: "Multiply every number except one, and a lone number has no others: the answer stays 1."
+        },
+        {
+          text: "<strong>Multiply everything, then divide out each slot.</strong> With no zero in sight, the product of all except nums[i] is just the total product divided by nums[i]. One loop multiplies everything, one pass divides.",
+          moves: [
+            "Multiply every number into total",
+            "Return total // x for each x in nums",
+            "Notice this breaks the day a zero shows up"
           ],
           checks: [{ input: "[1, 2, 3, 4]", output: "[24, 12, 8, 6]" }, { input: "[2, 3, 4]", output: "[12, 8, 6]" }],
-          diagram: `<svg viewBox="0 0 232 76" aria-hidden="true" focusable="false"><defs><marker id="ar-id-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="4" y="14" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="40" y="4" width="26" height="20" rx="7" class="st f2"/><text x="53" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="72" y="4" width="26" height="20" rx="7" class="st f2"/><text x="85" y="14" text-anchor="middle" dominant-baseline="central">2</text><rect x="104" y="4" width="26" height="20" rx="7" class="st f2"/><text x="117" y="14" text-anchor="middle" dominant-baseline="central">3</text><rect x="136" y="4" width="26" height="20" rx="7" class="st f2"/><text x="149" y="14" text-anchor="middle" dominant-baseline="central">4</text><text x="176" y="14" class="txd txs" text-anchor="start" dominant-baseline="central">24</text><line x1="53" y1="26" x2="53" y2="31" class="st-k" marker-end="url(#ar-id-1)"/><line x1="85" y1="26" x2="85" y2="31" class="st-k" marker-end="url(#ar-id-1)"/><line x1="117" y1="26" x2="117" y2="31" class="st-k" marker-end="url(#ar-id-1)"/><line x1="149" y1="26" x2="149" y2="31" class="st-k" marker-end="url(#ar-id-1)"/><text x="4" y="42" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="40" y="32" width="26" height="20" rx="7" class="st f5"/><text x="53" y="42" text-anchor="middle" dominant-baseline="central">24</text><rect x="72" y="32" width="26" height="20" rx="7" class="st f5"/><text x="85" y="42" text-anchor="middle" dominant-baseline="central">12</text><rect x="104" y="32" width="26" height="20" rx="7" class="st f5"/><text x="117" y="42" text-anchor="middle" dominant-baseline="central">8</text><rect x="136" y="32" width="26" height="20" rx="7" class="st f5"/><text x="149" y="42" text-anchor="middle" dominant-baseline="central">6</text><text x="116" y="64" class="txd txs" text-anchor="middle" dominant-baseline="central">total / nums[i]</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-id-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="40" y="4" width="26" height="22" rx="6" class="st f2"/><text x="53" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="72" y="4" width="26" height="22" rx="6" class="st f2"/><text x="85" y="15" text-anchor="middle" dominant-baseline="central">2</text><rect x="104" y="4" width="26" height="22" rx="6" class="st f2"/><text x="117" y="15" text-anchor="middle" dominant-baseline="central">3</text><rect x="136" y="4" width="26" height="22" rx="6" class="st f2"/><text x="149" y="15" text-anchor="middle" dominant-baseline="central">4</text><line x1="53" y1="28" x2="53" y2="36" class="st-k" marker-end="url(#ar-id-2)"/><line x1="85" y1="28" x2="85" y2="36" class="st-k" marker-end="url(#ar-id-2)"/><line x1="117" y1="28" x2="117" y2="36" class="st-k" marker-end="url(#ar-id-2)"/><line x1="149" y1="28" x2="149" y2="36" class="st-k" marker-end="url(#ar-id-2)"/><text x="6" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="40" y="38" width="26" height="22" rx="6" class="st f5"/><text x="53" y="49" text-anchor="middle" dominant-baseline="central">24</text><rect x="72" y="38" width="26" height="22" rx="6" class="st f5"/><text x="85" y="49" text-anchor="middle" dominant-baseline="central">12</text><rect x="104" y="38" width="26" height="22" rx="6" class="st f5"/><text x="117" y="49" text-anchor="middle" dominant-baseline="central">8</text><rect x="136" y="38" width="26" height="22" rx="6" class="st f5"/><text x="149" y="49" text-anchor="middle" dominant-baseline="central">6</text><text x="172" y="15" class="txd txs" text-anchor="start" dominant-baseline="central">total 24</text><text x="172" y="49" class="txd txs" text-anchor="start" dominant-baseline="central">24 // each</text></g></svg>`,
           tests: [
             "assert product_except_self([1, 2, 3, 4]) == [24, 12, 8, 6]",
             "assert product_except_self([2, 3, 4]) == [12, 8, 6]"
           ],
-          hint: "Division stops working at the first zero, so treat this as the no-zero case only."
+          hint: "This is the shortcut the problem bans, and it dies at the first zero because dividing by zero is an error."
         },
         {
-          text: "<strong>Handle one zero without dividing.</strong> The zero's own slot becomes the product of the other values, and every other slot becomes zero.",
+          text: "<strong>Patch the zero instead of dividing by it.</strong> When exactly one number is zero, its own slot gets the product of all the other numbers and every other slot is zero. Multiply only the nonzero values and remember where the zero sits.",
           moves: [
-            "Multiply only the nonzero values",
+            "Multiply only the numbers that are not zero",
             "Remember the index of the zero",
-            "No zero: divide as before",
-            "One zero: put the nonzero product at that index"
+            "No zero at all: divide as before",
+            "One zero: zeros everywhere, then the product at that index"
           ],
-          checks: [{ input: "[-1, 1, 0, -3, 3]", output: "[0, 0, 9, 0, 0]" }, { input: "[0, 7]", output: "[7, 0]" }, { input: "[2, 0, 3]", output: "[0, 6, 0]" }],
-          diagram: `<svg viewBox="0 0 232 86" aria-hidden="true" focusable="false"><defs><marker id="ar-id-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="4" y="14" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="34" y="4" width="28" height="20" rx="7" class="st f2"/><text x="48" y="14" text-anchor="middle" dominant-baseline="central">-1</text><rect x="68" y="4" width="28" height="20" rx="7" class="st f2"/><text x="82" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="102" y="4" width="28" height="20" rx="7" class="st f5 st-k"/><text x="116" y="14" text-anchor="middle" dominant-baseline="central">0</text><rect x="136" y="4" width="28" height="20" rx="7" class="st f2"/><text x="150" y="14" text-anchor="middle" dominant-baseline="central">-3</text><rect x="170" y="4" width="28" height="20" rx="7" class="st f2"/><text x="184" y="14" text-anchor="middle" dominant-baseline="central">3</text><line x1="116" y1="26" x2="116" y2="37" class="st-k" marker-end="url(#ar-id-2)"/><text x="4" y="52" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="34" y="42" width="28" height="20" rx="7" class="st f2"/><text x="48" y="52" text-anchor="middle" dominant-baseline="central">0</text><rect x="68" y="42" width="28" height="20" rx="7" class="st f2"/><text x="82" y="52" text-anchor="middle" dominant-baseline="central">0</text><rect x="102" y="42" width="28" height="20" rx="7" class="st f5 st-k"/><text x="116" y="52" text-anchor="middle" dominant-baseline="central">9</text><rect x="136" y="42" width="28" height="20" rx="7" class="st f2"/><text x="150" y="52" text-anchor="middle" dominant-baseline="central">0</text><rect x="170" y="42" width="28" height="20" rx="7" class="st f2"/><text x="184" y="52" text-anchor="middle" dominant-baseline="central">0</text><text x="116" y="76" class="txd txs" text-anchor="middle" dominant-baseline="central">one zero: product of the rest</text></g></svg>`,
+          checks: [{ input: "[-1, 1, 0, -3, 3]", output: "[0, 0, 9, 0, 0]" }, { input: "[2, 0, 3]", output: "[0, 6, 0]" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-id-3" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="13" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="34" y="4" width="28" height="18" rx="6" class="st f2"/><text x="48" y="13" text-anchor="middle" dominant-baseline="central">-1</text><rect x="66" y="4" width="28" height="18" rx="6" class="st f2"/><text x="80" y="13" text-anchor="middle" dominant-baseline="central">1</text><rect x="98" y="4" width="28" height="18" rx="6" class="st f5 st-k"/><text x="112" y="13" text-anchor="middle" dominant-baseline="central">0</text><rect x="130" y="4" width="28" height="18" rx="6" class="st f2"/><text x="144" y="13" text-anchor="middle" dominant-baseline="central">-3</text><rect x="162" y="4" width="28" height="18" rx="6" class="st f2"/><text x="176" y="13" text-anchor="middle" dominant-baseline="central">3</text><line x1="112" y1="24" x2="112" y2="31" class="st-k" marker-end="url(#ar-id-3)"/><text x="6" y="43" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="34" y="34" width="28" height="18" rx="6" class="st f2"/><text x="48" y="43" text-anchor="middle" dominant-baseline="central">0</text><rect x="66" y="34" width="28" height="18" rx="6" class="st f2"/><text x="80" y="43" text-anchor="middle" dominant-baseline="central">0</text><rect x="98" y="34" width="28" height="18" rx="6" class="st f5 st-k"/><text x="112" y="43" text-anchor="middle" dominant-baseline="central">9</text><rect x="130" y="34" width="28" height="18" rx="6" class="st f2"/><text x="144" y="43" text-anchor="middle" dominant-baseline="central">0</text><rect x="162" y="34" width="28" height="18" rx="6" class="st f2"/><text x="176" y="43" text-anchor="middle" dominant-baseline="central">0</text><text x="116" y="58" class="txd txs" text-anchor="middle" dominant-baseline="central">the zero slot gets the product 9</text></g></svg>`,
           tests: [
             "assert product_except_self([-1, 1, 0, -3, 3]) == [0, 0, 9, 0, 0]",
-            "assert product_except_self([0, 7]) == [7, 0]",
             "assert product_except_self([2, 0, 3]) == [0, 6, 0]"
           ],
-          hint: "A single zero needs its index; a flag alone cannot tell you where to put the product."
+          hint: "Every slot except the zero slot still multiplies the zero in, so those answers are all 0."
         },
         {
-          text: "<strong>Two zeros zero every slot, so stop dividing.</strong> Build prefix products from the left and suffix products from the right, then multiply them at each index.",
+          text: "<strong>Multiply the lefts and the rights instead.</strong> A second zero breaks the patch, and division was banned all along. For each slot, multiply everything to its left in one pass and everything to its right in a second pass.",
           moves: [
-            "Write the product of everything left of i",
-            "Walk back with the product of everything right",
-            "Multiply prefix by suffix at every index"
+            "Fill out with [1] * len(nums)",
+            "Forward pass: multiply in all numbers left of i",
+            "Backward pass: multiply in all numbers right of i",
+            "No division anywhere, so zeros never break it"
           ],
-          checks: [{ input: "[0, 0, 3]", output: "[0, 0, 0]" }, { input: "[1, 0, 0, 2]", output: "[0, 0, 0, 0]" }, { input: "[0, 0]", output: "[0, 0]" }],
-          diagram: `<svg viewBox="0 0 232 88" aria-hidden="true" focusable="false"><g><text x="4" y="10" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="64" y="2" width="28" height="16" rx="6" class="st f2"/><text x="78" y="10" text-anchor="middle" dominant-baseline="central">0</text><rect x="100" y="2" width="28" height="16" rx="6" class="st f2"/><text x="114" y="10" text-anchor="middle" dominant-baseline="central">0</text><rect x="136" y="2" width="28" height="16" rx="6" class="st f2"/><text x="150" y="10" text-anchor="middle" dominant-baseline="central">3</text><text x="4" y="32" class="txd txs" text-anchor="start" dominant-baseline="central">pre</text><rect x="64" y="24" width="28" height="16" rx="6" class="st f5"/><text x="78" y="32" text-anchor="middle" dominant-baseline="central">1</text><rect x="100" y="24" width="28" height="16" rx="6" class="st f5"/><text x="114" y="32" text-anchor="middle" dominant-baseline="central">0</text><rect x="136" y="24" width="28" height="16" rx="6" class="st f5"/><text x="150" y="32" text-anchor="middle" dominant-baseline="central">0</text><text x="4" y="54" class="txd txs" text-anchor="start" dominant-baseline="central">suf</text><rect x="64" y="46" width="28" height="16" rx="6" class="st f5"/><text x="78" y="54" text-anchor="middle" dominant-baseline="central">0</text><rect x="100" y="46" width="28" height="16" rx="6" class="st f5"/><text x="114" y="54" text-anchor="middle" dominant-baseline="central">3</text><rect x="136" y="46" width="28" height="16" rx="6" class="st f5"/><text x="150" y="54" text-anchor="middle" dominant-baseline="central">1</text><text x="4" y="76" class="txd txs" text-anchor="start" dominant-baseline="central">out</text><rect x="64" y="68" width="28" height="16" rx="6" class="st f2"/><text x="78" y="76" text-anchor="middle" dominant-baseline="central">0</text><rect x="100" y="68" width="28" height="16" rx="6" class="st f2"/><text x="114" y="76" text-anchor="middle" dominant-baseline="central">0</text><rect x="136" y="68" width="28" height="16" rx="6" class="st f2"/><text x="150" y="76" text-anchor="middle" dominant-baseline="central">0</text><text x="176" y="54" class="txd txs" text-anchor="start" dominant-baseline="central">pre * suf</text></g></svg>`,
+          checks: [{ input: "[0, 0, 3]", output: "[0, 0, 0]" }, { input: "[1, 0, 0, 2]", output: "[0, 0, 0, 0]" }, { input: "[]", output: "[]" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><text x="6" y="10" class="txd txs" text-anchor="start" dominant-baseline="central">nums</text><rect x="44" y="2" width="24" height="16" rx="5" class="st f2"/><text x="56" y="10" text-anchor="middle" dominant-baseline="central" class="txs">1</text><rect x="72" y="2" width="24" height="16" rx="5" class="st f2"/><text x="84" y="10" text-anchor="middle" dominant-baseline="central" class="txs">2</text><rect x="100" y="2" width="24" height="16" rx="5" class="st f2"/><text x="112" y="10" text-anchor="middle" dominant-baseline="central" class="txs">3</text><text x="6" y="30" class="txd txs" text-anchor="start" dominant-baseline="central">left</text><rect x="44" y="22" width="24" height="16" rx="5" class="st f5"/><text x="56" y="30" text-anchor="middle" dominant-baseline="central" class="txs">1</text><rect x="72" y="22" width="24" height="16" rx="5" class="st f5"/><text x="84" y="30" text-anchor="middle" dominant-baseline="central" class="txs">1</text><rect x="100" y="22" width="24" height="16" rx="5" class="st f5"/><text x="112" y="30" text-anchor="middle" dominant-baseline="central" class="txs">2</text><text x="6" y="50" class="txd txs" text-anchor="start" dominant-baseline="central">right</text><rect x="44" y="42" width="24" height="16" rx="5" class="st f5"/><text x="56" y="50" text-anchor="middle" dominant-baseline="central" class="txs">6</text><rect x="72" y="42" width="24" height="16" rx="5" class="st f5"/><text x="84" y="50" text-anchor="middle" dominant-baseline="central" class="txs">3</text><rect x="100" y="42" width="24" height="16" rx="5" class="st f5"/><text x="112" y="50" text-anchor="middle" dominant-baseline="central" class="txs">1</text><text x="138" y="30" class="txd txs" text-anchor="start" dominant-baseline="central">left x right = 6 3 2</text></g></svg>`,
           tests: [
             "assert product_except_self([0, 0, 3]) == [0, 0, 0]",
             "assert product_except_self([1, 0, 0, 2]) == [0, 0, 0, 0]",
-            "assert product_except_self([0, 0]) == [0, 0]"
+            "assert product_except_self([]) == []"
           ],
-          hint: "A zero-count patch still fails at the second zero; prefix and suffix never divide."
-        },
-        {
-          text: "<strong>Start the prefix table empty so an empty input stays empty.</strong> Seeding the table with one is convenient for real input but invents an answer when there is no input.",
-          moves: [
-            "Return [] when nums has no values",
-            "Otherwise build one slot per input value",
-            "A single value leaves its own slot at 1"
-          ],
-          checks: [{ input: "[]", output: "[]" }, { input: "[5]", output: "[1]" }],
-          diagram: `<svg viewBox="0 0 232 64" aria-hidden="true" focusable="false"><defs><marker id="ar-id-4" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><text x="6" y="16" class="txd txs" text-anchor="start" dominant-baseline="central">empty</text><rect x="64" y="6" width="40" height="20" rx="7" class="st dsh"/><text x="84" y="16" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><line x1="108" y1="16" x2="138" y2="16" class="st-k" marker-end="url(#ar-id-4)"/><rect x="142" y="6" width="40" height="20" rx="7" class="st dsh"/><text x="162" y="16" text-anchor="middle" dominant-baseline="central" class="txs">[]</text><text x="6" y="46" class="txd txs" text-anchor="start" dominant-baseline="central">single</text><rect x="64" y="36" width="26" height="20" rx="7" class="st f2"/><text x="77" y="46" text-anchor="middle" dominant-baseline="central">5</text><line x1="94" y1="46" x2="138" y2="46" class="st-k" marker-end="url(#ar-id-4)"/><rect x="142" y="36" width="26" height="20" rx="7" class="st f5"/><text x="155" y="46" text-anchor="middle" dominant-baseline="central">1</text></g></svg>`,
-          tests: [
-            "assert product_except_self([]) == []",
-            "assert product_except_self([5]) == [1]"
-          ],
-          hint: "A table seeded with a literal 1 has length one even when the input has length zero."
+          hint: "Walk left to right keeping a running prefix, then walk back with a running suffix, multiplying into out."
         }
       ],
       steps: [
+        `def product_except_self(nums):
+    return [1] * len(nums)
+`,
         `def product_except_self(nums):
     total = nums[0]
     for x in nums[1:]:
@@ -416,16 +420,6 @@ def bad(seen=[]):               # trap: seen survives calls
         return [total // x for x in nums]
     out = [0] * len(nums)
     out[zero_at] = total
-    return out
-`,
-        `def product_except_self(nums):
-    out = [1]
-    for x in nums[:-1]:
-        out.append(out[-1] * x)
-    suffix = 1
-    for i in range(len(nums) - 1, -1, -1):
-        out[i] *= suffix
-        suffix *= nums[i]
     return out
 `,
         `def product_except_self(nums):

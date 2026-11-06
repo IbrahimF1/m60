@@ -30,7 +30,7 @@ for num in nums:               # walk houses left to right
 `,
     exercise: {
       title: "House Robber",
-      prompt: `Given <code>nums</code>, the cash in each house, return the largest total you can take without robbing two adjacent houses. Write the recurrence first, then flatten it to two rolling variables.`,
+      prompt: `Given <code>nums</code>, the cash in each house, return the largest total you can take without robbing two adjacent houses.`,
       leetcode: "https://leetcode.com/problems/house-robber/",
       docs: [
         { text: "@lru_cache", url: "https://docs.python.org/3/library/functools.html#functools.lru_cache" },
@@ -42,92 +42,99 @@ for num in nums:               # walk houses left to right
 `,
       tasks: [
         {
-          text: "<strong>Start with the first house.</strong> On a one-house street the whole answer is that house, and when the second is worth less it cannot change the total.",
+          text: "<strong>Rob every second house.</strong> Take house 0, skip house 1, take house 2, and keep going to the end. That plan never touches two neighbors, so it is a legal first answer for any street.",
           moves: [
-            "Start the running total at nums[0]",
-            "Walk the even indices only",
-            "Return the total for the street"
+            "Start the total at house 0",
+            "Skip a house, add the next, repeat to the end",
+            "Return the total of houses 0, 2, 4 and so on"
           ],
-          checks: [{ input: "5", output: "5" }, { input: "5 1", output: "5" }, { input: "4", output: "4" }],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-dp1-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="26" y="14" width="34" height="24" rx="7" class="st f5"/><text x="43" y="26" text-anchor="middle" dominant-baseline="central">5</text><rect x="76" y="14" width="34" height="24" rx="7" class="st dsh"/><text x="93" y="26" text-anchor="middle" dominant-baseline="central">1</text><text x="43" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">take</text><text x="93" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">skip</text><line x1="114" y1="26" x2="146" y2="26" class="st-k" marker-end="url(#ar-dp1-1)"/><text x="154" y="26" text-anchor="start" dominant-baseline="central" class="txd txs">total 5</text></g></svg>`,
+          checks: [{ input: "[5]", output: "5" }, { input: "[5, 1]", output: "5" }, { input: "[10, 1, 2]", output: "12" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="30" y="8" width="34" height="22" rx="6" class="st f5"/><text x="47" y="19" text-anchor="middle" dominant-baseline="central">10</text><rect x="72" y="8" width="34" height="22" rx="6" class="st dsh"/><text x="89" y="19" text-anchor="middle" dominant-baseline="central">1</text><rect x="114" y="8" width="34" height="22" rx="6" class="st f5"/><text x="131" y="19" text-anchor="middle" dominant-baseline="central">2</text><text x="47" y="44" text-anchor="middle" dominant-baseline="central" class="txd txs">take</text><text x="89" y="44" text-anchor="middle" dominant-baseline="central" class="txd txs">skip</text><text x="131" y="44" text-anchor="middle" dominant-baseline="central" class="txd txs">take</text><text x="116" y="58" text-anchor="middle" dominant-baseline="central" class="txd txs">10 + 2 = 12, no neighbors touch</text></g></svg>`,
           tests: [
             "assert rob([5]) == 5",
             "assert rob([5, 1]) == 5",
-            "assert rob([4]) == 4"
+            "assert rob([10, 1, 2]) == 12"
           ],
-          hint: "A one-house street has no neighbor to skip, so the total is that house itself."
+          hint: "Houses 0, 2, 4 and so on never touch, so the plan is always legal; it just misses streets where the odd positions hold more cash."
         },
         {
-          text: "<strong>Adjacent houses force a real choice.</strong> Taking the first house locks out the second, but the last house is still free, so a street can use both ends.",
+          text: "<strong>Try both stride plans.</strong> The richer houses may sit at positions 1, 3, 5 and so on. Sum that plan too, and return the larger of the two totals.",
           moves: [
-            "Compare each adjacent pair of houses",
-            "Add the larger house of every pair",
-            "Move two positions after each pair"
+            "Sum the houses at even positions, nums[0::2]",
+            "Sum the houses at odd positions, nums[1::2]",
+            "Return the larger of the two sums"
           ],
-          checks: [{ input: "2 1 1 2", output: "4" }, { input: "3 2 2 3", output: "6" }],
-          diagram: `<svg viewBox="0 0 232 64" aria-hidden="true" focusable="false"><g><rect x="20" y="10" width="32" height="24" rx="7" class="st f5"/><text x="36" y="22" text-anchor="middle" dominant-baseline="central">2</text><rect x="60" y="10" width="32" height="24" rx="7" class="st dsh"/><text x="76" y="22" text-anchor="middle" dominant-baseline="central">1</text><rect x="100" y="10" width="32" height="24" rx="7" class="st dsh"/><text x="116" y="22" text-anchor="middle" dominant-baseline="central">1</text><rect x="140" y="10" width="32" height="24" rx="7" class="st f5"/><text x="156" y="22" text-anchor="middle" dominant-baseline="central">2</text><text x="36" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">take</text><text x="76" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">skip</text><text x="116" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">skip</text><text x="156" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">take</text><text x="196" y="22" text-anchor="start" dominant-baseline="central">= 4</text></g></svg>`,
+          checks: [{ input: "[1, 2]", output: "2" }, { input: "[2, 7]", output: "7" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="30" y="7" width="34" height="20" rx="6" class="st f5"/><text x="47" y="17" text-anchor="middle" dominant-baseline="central">1</text><text x="76" y="17" text-anchor="start" dominant-baseline="central" class="txd txs">start at house 0: total 1</text><rect x="30" y="31" width="34" height="20" rx="6" class="st f5 st-k"/><text x="47" y="41" text-anchor="middle" dominant-baseline="central">2</text><text x="76" y="41" text-anchor="start" dominant-baseline="central" class="txd txs">start at house 1: total 2</text><text x="116" y="58" text-anchor="middle" dominant-baseline="central" class="txd txs">the plan starting at house 1 wins</text></g></svg>`,
           tests: [
-            "assert rob([2, 1, 1, 2]) == 4",
-            "assert rob([3, 2, 2, 3]) == 6"
+            "assert rob([1, 2]) == 2",
+            "assert rob([2, 7]) == 7"
           ],
-          hint: "A pair is not independent of the pair before it, so local compares can still miss the best street."
+          hint: "sum(nums[0::2]) and sum(nums[1::2]) are the two plans. The better one still misses routes that mix wide and narrow gaps."
         },
         {
-          text: "<strong>Carry the best total for the street so far.</strong> On <code>[1, 2, 3, 1]</code> houses 0 and 2 beat every neighbor pair, and the same recurrence scales to longer streets.",
+          text: "<strong>Choose again at every house.</strong> The best route mixes wide and narrow gaps, so neither stride plan wins in general. Keep a list of best totals, one per street length: at each house either skip it and reuse the total before it, or take it and add the total from two houses back.",
           moves: [
-            "Keep the best total up to the previous house and up to the current house",
-            "For each house, take max(skip it, its cash plus the total two back)",
-            "Roll the two totals forward in one tuple assignment"
+            "Keep a list best where best[i] is the top cash from the first i houses",
+            "Seed best[0] with 0 and best[1] with nums[0]",
+            "Fill best[i] with max(best[i - 1], best[i - 2] + nums[i - 1])",
+            "Return the last entry"
           ],
-          checks: [{ input: "1 2 3 1", output: "4" }, { input: "4 10 3 1 5", output: "15" }, { input: "5 1 1 5 1", output: "10" }],
-          diagram: `<svg viewBox="0 0 232 64" aria-hidden="true" focusable="false"><g><rect x="10" y="10" width="32" height="24" rx="7" class="st dsh"/><text x="26" y="22" text-anchor="middle" dominant-baseline="central">4</text><rect x="50" y="10" width="32" height="24" rx="7" class="st f5 st-k"/><text x="66" y="22" text-anchor="middle" dominant-baseline="central">10</text><rect x="90" y="10" width="32" height="24" rx="7" class="st dsh"/><text x="106" y="22" text-anchor="middle" dominant-baseline="central">3</text><rect x="130" y="10" width="32" height="24" rx="7" class="st dsh"/><text x="146" y="22" text-anchor="middle" dominant-baseline="central">1</text><rect x="170" y="10" width="32" height="24" rx="7" class="st f5 st-k"/><text x="186" y="22" text-anchor="middle" dominant-baseline="central">5</text><text x="116" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">10 + 5 = 15, with the gap skipped</text></g></svg>`,
+          checks: [{ input: "[5, 1, 1, 5]", output: "10" }, { input: "[1, 3, 1, 3, 100]", output: "103" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="42" y="5" width="30" height="18" rx="6" class="st f2"/><text x="57" y="14" text-anchor="middle" dominant-baseline="central">5</text><rect x="76" y="5" width="30" height="18" rx="6" class="st f2"/><text x="91" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="110" y="5" width="30" height="18" rx="6" class="st f2"/><text x="125" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="144" y="5" width="30" height="18" rx="6" class="st f2"/><text x="159" y="14" text-anchor="middle" dominant-baseline="central">5</text><rect x="8" y="29" width="30" height="18" rx="6" class="st f2"/><text x="23" y="38" text-anchor="middle" dominant-baseline="central">0</text><rect x="42" y="29" width="30" height="18" rx="6" class="st f2"/><text x="57" y="38" text-anchor="middle" dominant-baseline="central">5</text><rect x="76" y="29" width="30" height="18" rx="6" class="st f2"/><text x="91" y="38" text-anchor="middle" dominant-baseline="central">5</text><rect x="110" y="29" width="30" height="18" rx="6" class="st f2"/><text x="125" y="38" text-anchor="middle" dominant-baseline="central">6</text><rect x="144" y="29" width="30" height="18" rx="6" class="st f5 st-k"/><text x="159" y="38" text-anchor="middle" dominant-baseline="central">10</text><text x="116" y="57" text-anchor="middle" dominant-baseline="central" class="txd txs">best per prefix; last entry is 10</text></g></svg>`,
           tests: [
-            "assert rob([1, 2, 3, 1]) == 4",
-            "assert rob([4, 10, 3, 1, 5]) == 15",
-            "assert rob([5, 1, 1, 5, 1]) == 10"
+            "assert rob([5, 1, 1, 5]) == 10",
+            "assert rob([1, 3, 1, 3, 100]) == 103"
           ],
-          hint: "The recurrence reads the total two houses back, not the previous pair's sum."
+          hint: "Skip the newest house: keep best[i - 1]. Take it: best[i - 2] plus its cash. The larger of the two fills best[i]."
         },
         {
-          text: "<strong>Guard the empty street.</strong> With no houses the loop never runs, so both totals must start at zero instead of being seeded from nums[0].",
+          text: "<strong>Keep only the last two entries.</strong> Each new entry reads just the two entries before it, so two rolling totals can replace the whole table. Start both at 0 and walk every house: a street with no houses then returns 0 instead of crashing.",
           moves: [
-            "Start prev and curr at 0 before the loop",
-            "Seed nothing from nums[0]",
-            "Return curr after the loop"
+            "Keep two running totals instead of the list",
+            "Both start at 0, so an empty street returns 0",
+            "At each house the new total is max(curr, prev + cash)",
+            "Shift the totals forward in one tuple assignment"
           ],
-          checks: [{ input: "empty", output: "0" }],
-          diagram: `<svg viewBox="0 0 232 56" aria-hidden="true" focusable="false"><defs><marker id="ar-dp1-4" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="20" y="16" width="92" height="24" rx="7" class="st dsh"/><text x="66" y="28" text-anchor="middle" dominant-baseline="central" class="txd txs">no houses</text><line x1="120" y1="28" x2="150" y2="28" class="st-k" marker-end="url(#ar-dp1-4)"/><text x="160" y="28" text-anchor="start" dominant-baseline="central">0</text></g></svg>`,
-          tests: ["assert rob([]) == 0"],
-          hint: "Reading nums[0] to seed the total raises IndexError before an empty street can return 0."
+          checks: [{ input: "[]", output: "0" }, { input: "[2, 1, 1, 2]", output: "4" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-d1-4" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="24" y="16" width="56" height="24" rx="6" class="st f2"/><text x="52" y="28" text-anchor="middle" dominant-baseline="central">prev = 5</text><rect x="116" y="16" width="56" height="24" rx="6" class="st f5"/><text x="144" y="28" text-anchor="middle" dominant-baseline="central">curr = 10</text><line x1="86" y1="28" x2="110" y2="28" class="st-k" marker-end="url(#ar-d1-4)"/><text x="116" y="56" text-anchor="middle" dominant-baseline="central" class="txd txs">two totals roll; no houses keeps 0</text></g></svg>`,
+          tests: [
+            "assert rob([]) == 0",
+            "assert rob([2, 1, 1, 2]) == 4"
+          ],
+          hint: "prev and curr are the last two table entries. Both start at 0, and an empty street never enters the loop."
         }
       ],
       steps: [
         `def rob(nums):
-    total = nums[0]                  # first house, then every other house
+    total = nums[0]                  # take house 0, then every second house
     for i in range(2, len(nums), 2):
         total += nums[i]
     return total
 `,
         `def rob(nums):
-    if len(nums) <= 2:
-        return max(nums)
-    return max(nums[0], nums[1]) + rob(nums[2:])
+    even_plan = sum(nums[0::2])      # houses 0, 2, 4 and so on
+    odd_plan = sum(nums[1::2])       # houses 1, 3, 5 and so on
+    return max(even_plan, odd_plan)
 `,
         `def rob(nums):
-    prev, curr = 0, nums[0]
-    for num in nums[1:]:
-        prev, curr = curr, max(curr, prev + num)
-    return curr
+    best = [0] * (len(nums) + 1)     # best[i]: most cash from the first i houses
+    best[1] = nums[0]                # one house: take it
+    for i in range(2, len(nums) + 1):
+        take = best[i - 2] + nums[i - 1]
+        skip = best[i - 1]
+        best[i] = max(take, skip)
+    return best[-1]
 `,
         `def rob(nums):
-    prev, curr = 0, 0
-    for num in nums:
+    prev, curr = 0, 0                # the last two entries of the table
+    for num in nums:                 # both start at 0, so an empty street returns 0
         prev, curr = curr, max(curr, prev + num)
     return curr
 `
       ],
       solution: `def rob(nums):
-    prev, curr = 0, 0
+    prev, curr = 0, 0                # the last two table entries
     for num in nums:
         prev, curr = curr, max(curr, prev + num)
     return curr
@@ -157,7 +164,7 @@ for _ in range(m - 1):         # each pass folds in one more row
 `,
     exercise: {
       title: "Unique Paths",
-      prompt: `An <code>m</code> by <code>n</code> grid, a robot in the top-left corner, moves restricted to right and down. Return the number of distinct paths to the bottom-right corner using a single rolling row.`,
+      prompt: `An <code>m</code> by <code>n</code> grid, a robot in the top-left corner, moves restricted to right and down. Return the number of distinct paths to the bottom-right corner.`,
       leetcode: "https://leetcode.com/problems/unique-paths/",
       docs: [
         { text: "@lru_cache", url: "https://docs.python.org/3/library/functools.html#functools.lru_cache" },
@@ -170,93 +177,82 @@ for _ in range(m - 1):         # each pass folds in one more row
 `,
       tasks: [
         {
-          text: "<strong>A corridor has exactly one path.</strong> With one row or one column the robot never chooses, so every thin grid answers 1.",
+          text: "<strong>One lane, one path.</strong> A grid that is a single row or a single column gives the robot no choice: the only route goes straight. Return 1 for every grid; it is exactly right for one-lane grids and too small for all wider ones.",
           moves: [
-            "Return 1 when m is 1",
-            "Return 1 when n is 1",
-            "Treat the 1 by 1 grid as the shortest corridor"
+            "Return 1 for every grid",
+            "That is exact for single-row and single-column grids",
+            "Wider grids have more paths, so 1 falls short"
           ],
           checks: [{ input: "1 x 4", output: "1" }, { input: "5 x 1", output: "1" }, { input: "1 x 1", output: "1" }],
-          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-dp2-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="14" y="14" width="32" height="22" rx="7" class="st f2"/><text x="30" y="25" text-anchor="middle" dominant-baseline="central">1</text><rect x="60" y="14" width="32" height="22" rx="7" class="st f2"/><text x="76" y="25" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="14" width="32" height="22" rx="7" class="st f2"/><text x="122" y="25" text-anchor="middle" dominant-baseline="central">1</text><rect x="152" y="14" width="32" height="22" rx="7" class="st f5"/><text x="168" y="25" text-anchor="middle" dominant-baseline="central">1</text><line x1="48" y1="25" x2="56" y2="25" class="st-k" marker-end="url(#ar-dp2-1)"/><line x1="94" y1="25" x2="102" y2="25" class="st-k" marker-end="url(#ar-dp2-1)"/><line x1="140" y1="25" x2="148" y2="25" class="st-k" marker-end="url(#ar-dp2-1)"/><text x="116" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">one row, one path</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-d2-1" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="14" y="14" width="32" height="22" rx="7" class="st f2"/><text x="30" y="25" text-anchor="middle" dominant-baseline="central">1</text><rect x="60" y="14" width="32" height="22" rx="7" class="st f2"/><text x="76" y="25" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="14" width="32" height="22" rx="7" class="st f2"/><text x="122" y="25" text-anchor="middle" dominant-baseline="central">1</text><rect x="152" y="14" width="32" height="22" rx="7" class="st f5"/><text x="168" y="25" text-anchor="middle" dominant-baseline="central">1</text><line x1="48" y1="25" x2="56" y2="25" class="st-k" marker-end="url(#ar-d2-1)"/><line x1="94" y1="25" x2="102" y2="25" class="st-k" marker-end="url(#ar-d2-1)"/><line x1="140" y1="25" x2="148" y2="25" class="st-k" marker-end="url(#ar-d2-1)"/><text x="116" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">one row: a single straight path</text></g></svg>`,
           tests: [
             "assert unique_paths(1, 4) == 1",
             "assert unique_paths(5, 1) == 1",
             "assert unique_paths(1, 1) == 1"
           ],
-          hint: "No branch means no multiplication; a corridor is one route however long it is."
+          hint: "A corridor forces every move in one direction, so exactly one route exists; wider grids branch and multiply."
         },
         {
-          text: "<strong>The first real choice is a 2 by 2 grid.</strong> From the top-left corner the robot can go right then down, or down then right, and nothing else.",
+          text: "<strong>Paths arrive from above or from the left.</strong> Every cell of the top row has exactly 1 path, the straight run from the corner. In the second row each cell holds the 1 from above plus the count to its left, so the row reads 1, 2, 3 and a two-row grid of n columns ends at n.",
           moves: [
-            "Notice the grid is no longer a corridor",
-            "Count the two orders of one right and one down",
-            "Return 2 for this smallest square"
+            "If m is 1, return 1: no sweep for a single row",
+            "Make row a list of n ones, the top row",
+            "For j from 1 on, add row[j - 1] into row[j]",
+            "Return the last count"
           ],
-          checks: [{ input: "2 x 2", output: "2" }],
-          diagram: `<svg viewBox="0 0 232 70" aria-hidden="true" focusable="false"><g><rect x="80" y="8" width="34" height="22" rx="7" class="st f5 st-k"/><rect x="118" y="8" width="34" height="22" rx="7" class="st f2"/><rect x="80" y="34" width="34" height="22" rx="7" class="st f2"/><rect x="118" y="34" width="34" height="22" rx="7" class="st f5 st-k"/><text x="166" y="45" text-anchor="start" dominant-baseline="central" class="txd txs">= 2</text><text x="116" y="64" text-anchor="middle" dominant-baseline="central" class="txd txs">right-down or down-right</text></g></svg>`,
-          tests: ["assert unique_paths(2, 2) == 2"],
-          hint: "Two paths exist only because the order of the right and the down can swap."
+          checks: [{ input: "2 x 2", output: "2" }, { input: "2 x 3", output: "3" }, { input: "2 x 5", output: "5" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-d2-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="40" y="6" width="32" height="18" rx="6" class="st f2"/><text x="56" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="80" y="6" width="32" height="18" rx="6" class="st f2"/><text x="96" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="120" y="6" width="32" height="18" rx="6" class="st f2"/><text x="136" y="15" text-anchor="middle" dominant-baseline="central">1</text><rect x="40" y="30" width="32" height="18" rx="6" class="st f2"/><text x="56" y="39" text-anchor="middle" dominant-baseline="central">1</text><rect x="80" y="30" width="32" height="18" rx="6" class="st f5"/><text x="96" y="39" text-anchor="middle" dominant-baseline="central">2</text><rect x="120" y="30" width="32" height="18" rx="6" class="st f5 st-k"/><text x="136" y="39" text-anchor="middle" dominant-baseline="central">3</text><line x1="96" y1="25" x2="96" y2="28" class="st-k" marker-end="url(#ar-d2-2)"/><line x1="113" y1="39" x2="118" y2="39" class="st-k" marker-end="url(#ar-d2-2)"/><text x="116" y="58" text-anchor="middle" dominant-baseline="central" class="txd txs">each new cell adds its left neighbor</text></g></svg>`,
+          tests: [
+            "assert unique_paths(2, 2) == 2",
+            "assert unique_paths(2, 3) == 3",
+            "assert unique_paths(2, 5) == 5"
+          ],
+          hint: "row[j] += row[j - 1]: keep the 1 from above and add the paths already counted to the left."
         },
         {
-          text: "<strong>Count the moves a path needs.</strong> A 3 by 2 grid takes two downs and one right, and there are three orders for those moves, so the answer is three.",
+          text: "<strong>One sweep per row.</strong> The third row adds its own paths on top of the second row's counts, and so on down the grid. Sweep the same list once for every row below the top; each cell still reads the fresh count to its left and the old count from above.",
           moves: [
-            "Count the m + n - 2 moves in one path",
-            "List the orders of the downs and rights",
-            "Return that count for a 3 by 2 grid"
+            "Wrap the sweep in a loop that runs m - 1 times",
+            "Each pass adds one more row's paths to the counts",
+            "Zero sweeps leave a one-row grid correct",
+            "The last cell holds the answer"
           ],
-          checks: [{ input: "3 x 2", output: "3" }, { input: "2 x 3", output: "3" }],
-          diagram: `<svg viewBox="0 0 232 70" aria-hidden="true" focusable="false"><g><text x="6" y="12" text-anchor="start" dominant-baseline="central" class="txd txs">3 x 2: two downs, one right</text><rect x="24" y="22" width="20" height="14" rx="5" class="st f5"/><text x="34" y="29" text-anchor="middle" dominant-baseline="central" class="txs">D</text><rect x="48" y="22" width="20" height="14" rx="5" class="st f5"/><text x="58" y="29" text-anchor="middle" dominant-baseline="central" class="txs">D</text><rect x="72" y="22" width="20" height="14" rx="5" class="st f5"/><text x="82" y="29" text-anchor="middle" dominant-baseline="central" class="txs">R</text><rect x="24" y="40" width="20" height="14" rx="5" class="st f2"/><text x="34" y="47" text-anchor="middle" dominant-baseline="central" class="txs">D</text><rect x="48" y="40" width="20" height="14" rx="5" class="st f2"/><text x="58" y="47" text-anchor="middle" dominant-baseline="central" class="txs">R</text><rect x="72" y="40" width="20" height="14" rx="5" class="st f2"/><text x="82" y="47" text-anchor="middle" dominant-baseline="central" class="txs">D</text><rect x="24" y="58" width="20" height="14" rx="5" class="st f2"/><text x="34" y="65" text-anchor="middle" dominant-baseline="central" class="txs">R</text><rect x="48" y="58" width="20" height="14" rx="5" class="st f2"/><text x="58" y="65" text-anchor="middle" dominant-baseline="central" class="txs">D</text><rect x="72" y="58" width="20" height="14" rx="5" class="st f2"/><text x="82" y="65" text-anchor="middle" dominant-baseline="central" class="txs">D</text><text x="112" y="47" text-anchor="start" dominant-baseline="central" class="txd txs">three routes</text></g></svg>`,
+          checks: [{ input: "3 x 2", output: "3" }, { input: "3 x 3", output: "6" }, { input: "3 x 7", output: "28" }, { input: "5 x 4", output: "35" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="20" y="6" width="24" height="16" rx="5" class="st f2"/><text x="32" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="48" y="6" width="24" height="16" rx="5" class="st f2"/><text x="60" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="76" y="6" width="24" height="16" rx="5" class="st f2"/><text x="88" y="14" text-anchor="middle" dominant-baseline="central">1</text><rect x="20" y="26" width="24" height="16" rx="5" class="st f2"/><text x="32" y="34" text-anchor="middle" dominant-baseline="central">1</text><rect x="48" y="26" width="24" height="16" rx="5" class="st f5"/><text x="60" y="34" text-anchor="middle" dominant-baseline="central">2</text><rect x="76" y="26" width="24" height="16" rx="5" class="st f5"/><text x="88" y="34" text-anchor="middle" dominant-baseline="central">3</text><rect x="20" y="46" width="24" height="16" rx="5" class="st f2"/><text x="32" y="54" text-anchor="middle" dominant-baseline="central">1</text><rect x="48" y="46" width="24" height="16" rx="5" class="st f2"/><text x="60" y="54" text-anchor="middle" dominant-baseline="central">3</text><rect x="76" y="46" width="24" height="16" rx="5" class="st f5 st-k"/><text x="88" y="54" text-anchor="middle" dominant-baseline="central">6</text><text x="116" y="34" text-anchor="start" dominant-baseline="central" class="txd txs">one sweep per</text><text x="116" y="46" text-anchor="start" dominant-baseline="central" class="txd txs">row below the top</text></g></svg>`,
           tests: [
             "assert unique_paths(3, 2) == 3",
-            "assert unique_paths(2, 3) == 3"
-          ],
-          hint: "The move count gives path length, not how many paths share that length."
-        },
-        {
-          text: "<strong>Count routes, not moves.</strong> Every cell is reached from above or from the left, so its count is the sum of those two, and the bottom-right cell holds the answer.",
-          moves: [
-            "Seed the top row and left column with 1",
-            "Fill each cell with the cell above plus the cell left",
-            "Return the bottom-right cell"
-          ],
-          checks: [{ input: "3 x 7", output: "28" }, { input: "3 x 3", output: "6" }],
-          diagram: `<svg viewBox="0 0 232 86" aria-hidden="true" focusable="false"><g><rect x="72" y="8" width="30" height="20" rx="7" class="st f2"/><text x="87" y="18" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="8" width="30" height="20" rx="7" class="st f2"/><text x="121" y="18" text-anchor="middle" dominant-baseline="central">1</text><rect x="140" y="8" width="30" height="20" rx="7" class="st f2"/><text x="155" y="18" text-anchor="middle" dominant-baseline="central">1</text><rect x="72" y="32" width="30" height="20" rx="7" class="st f2"/><text x="87" y="42" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="32" width="30" height="20" rx="7" class="st f2"/><text x="121" y="42" text-anchor="middle" dominant-baseline="central">2</text><rect x="140" y="32" width="30" height="20" rx="7" class="st f2"/><text x="155" y="42" text-anchor="middle" dominant-baseline="central">3</text><rect x="72" y="56" width="30" height="20" rx="7" class="st f2"/><text x="87" y="66" text-anchor="middle" dominant-baseline="central">1</text><rect x="106" y="56" width="30" height="20" rx="7" class="st f2"/><text x="121" y="66" text-anchor="middle" dominant-baseline="central">3</text><rect x="140" y="56" width="30" height="20" rx="7" class="st f5 st-k"/><text x="155" y="66" text-anchor="middle" dominant-baseline="central">6</text><text x="116" y="82" text-anchor="middle" dominant-baseline="central" class="txd txs">3 x 3: each cell = above + left</text></g></svg>`,
-          tests: [
+            "assert unique_paths(3, 3) == 6",
             "assert unique_paths(3, 7) == 28",
-            "assert unique_paths(3, 3) == 6"
+            "assert unique_paths(5, 4) == 35"
           ],
-          hint: "A table with zeroed borders loses every path that hugs the top or left edge."
+          hint: "Slot j still holds the count from the row above when slot j - 1 is already fresh, so one list is enough."
         }
       ],
       steps: [
         `def unique_paths(m, n):
-    if m == 1 or n == 1:          # a corridor never branches
-        return 1
-    return 0
+    return 1                         # every grid has at least one straight path
 `,
         `def unique_paths(m, n):
-    if m == 1 or n == 1:
+    if m == 1:                       # a single row: nothing to sweep
         return 1
-    return 2                      # right then down, or down then right
+    row = [1] * n                    # path counts along the top row
+    for j in range(1, n):
+        row[j] += row[j - 1]         # the 1 from above plus the count to the left
+    return row[-1]
 `,
         `def unique_paths(m, n):
-    if m == 1 or n == 1:
-        return 1
-    return m + n - 2              # count the moves in one path
-`,
-        `def unique_paths(m, n):
-    row = [1] * n
-    for _ in range(m - 1):
+    row = [1] * n                    # path counts along the top row
+    for _ in range(m - 1):           # one sweep per row below the top
         for j in range(1, n):
-            row[j] += row[j - 1]
+            row[j] += row[j - 1]     # fresh count from the left, old count from above
     return row[-1]
 `
       ],
       solution: `def unique_paths(m, n):
-    row = [1] * n
-    for _ in range(m - 1):
+    row = [1] * n                    # path counts along the top row
+    for _ in range(m - 1):           # one sweep per row below the top
         for j in range(1, n):
-            row[j] += row[j - 1]
+            row[j] += row[j - 1]     # fresh count from the left, old count from above
     return row[-1]
 `,
     },
@@ -302,7 +298,7 @@ for i in range(len(s)):               # every index: odd and even centers
 `,
     exercise: {
       title: "Longest Palindromic Substring",
-      prompt: `Given a string <code>s</code>, return its longest palindromic substring. Expand around each of the 2n-1 centers and keep the widest window; the helper that grows a window is provided.`,
+      prompt: `Given a string <code>s</code>, return its longest palindromic substring. The helper <code>expand(s, left, right)</code> grows a palindrome outward from a center while the end letters match.`,
       leetcode: "https://leetcode.com/problems/longest-palindromic-substring/",
       docs: [
         { text: "Slicing (s[l + 1:r])", url: "https://docs.python.org/3/library/stdtypes.html#common-sequence-operations" },
@@ -321,61 +317,66 @@ def longest_palindrome(s):
 `,
       tasks: [
         {
-          text: "<strong>One character is already a palindrome.</strong> Put the center on index 0, expand with the helper, and return that single character.",
+          text: "<strong>One letter is already a palindrome.</strong> A single letter reads the same forwards and backwards, so the first character is a legal answer for any string. Return it; it is exactly right whenever nothing longer exists.",
           moves: [
-            "Read s[0] as the starting best",
-            "Expand from the center (0, 0)",
-            "Return the longer of the best and the expansion"
+            "Return s[0], the first character",
+            "A single letter reads the same both ways",
+            "It falls short once a longer palindrome exists"
           ],
-          checks: [{ input: "a", output: "a" }, { input: "z", output: "z" }],
-          diagram: `<svg viewBox="0 0 232 60" aria-hidden="true" focusable="false"><g><rect x="102" y="10" width="28" height="24" rx="7" class="st f5 st-k"/><text x="116" y="22" text-anchor="middle" dominant-baseline="central">a</text><line x1="96" y1="22" x2="82" y2="22" class="st-d dsh"/><line x1="136" y1="22" x2="150" y2="22" class="st-d dsh"/><text x="116" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">center 0, no neighbor to match</text></g></svg>`,
+          checks: [{ input: "a", output: "a" }, { input: "z", output: "z" }, { input: "abc", output: "a" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="64" y="8" width="30" height="22" rx="6" class="st f5 st-k"/><text x="79" y="19" text-anchor="middle" dominant-baseline="central">a</text><rect x="100" y="8" width="30" height="22" rx="6" class="st dsh"/><text x="115" y="19" text-anchor="middle" dominant-baseline="central">b</text><rect x="136" y="8" width="30" height="22" rx="6" class="st dsh"/><text x="151" y="19" text-anchor="middle" dominant-baseline="central">c</text><text x="116" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">any one letter is a palindrome</text></g></svg>`,
           tests: [
             "assert longest_palindrome(\"a\") == \"a\"",
-            "assert longest_palindrome(\"z\") == \"z\""
+            "assert longest_palindrome(\"z\") == \"z\"",
+            "assert longest_palindrome(\"abc\") == \"a\""
           ],
-          hint: "A center with no matching neighbor on either side returns just itself."
+          hint: "s[0] is always a palindrome of length 1; it is the answer only when no run of length 2 or more exists."
         },
         {
-          text: "<strong>Odd palindromes grow from a character.</strong> Try every index as a center, expand while the ends match, and keep the widest window.",
+          text: "<strong>Grow around every letter.</strong> The helper <code>expand(s, i, i)</code> starts at one letter and pushes both ends outward while they match. Try it at every index and keep the longest result you see.",
           moves: [
             "Loop i over every index of s",
-            "Expand around (i, i), the odd center",
-            "Replace best only when the candidate is longer"
+            "Grow a candidate with expand(s, i, i)",
+            "Keep it only when it is longer than the best"
           ],
           checks: [{ input: "babad", output: "bab or aba" }, { input: "xabay", output: "aba" }],
-          diagram: `<svg viewBox="0 0 232 60" aria-hidden="true" focusable="false"><g><rect x="28" y="10" width="28" height="22" rx="7" class="st f2"/><text x="42" y="21" text-anchor="middle" dominant-baseline="central">b</text><rect x="66" y="10" width="28" height="22" rx="7" class="st f5 st-k"/><text x="80" y="21" text-anchor="middle" dominant-baseline="central">a</text><rect x="104" y="10" width="28" height="22" rx="7" class="st f2"/><text x="118" y="21" text-anchor="middle" dominant-baseline="central">b</text><rect x="142" y="10" width="28" height="22" rx="7" class="st dsh"/><text x="156" y="21" text-anchor="middle" dominant-baseline="central">a</text><rect x="180" y="10" width="28" height="22" rx="7" class="st dsh"/><text x="194" y="21" text-anchor="middle" dominant-baseline="central">d</text><text x="116" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">center 1 expands to bab</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><defs><marker id="ar-fi-2" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="40" y="8" width="28" height="22" rx="6" class="st f5"/><text x="54" y="19" text-anchor="middle" dominant-baseline="central">b</text><rect x="72" y="8" width="28" height="22" rx="6" class="st f5 st-k"/><text x="86" y="19" text-anchor="middle" dominant-baseline="central">a</text><rect x="104" y="8" width="28" height="22" rx="6" class="st f5"/><text x="118" y="19" text-anchor="middle" dominant-baseline="central">b</text><rect x="136" y="8" width="28" height="22" rx="6" class="st dsh"/><text x="150" y="19" text-anchor="middle" dominant-baseline="central">a</text><rect x="168" y="8" width="28" height="22" rx="6" class="st dsh"/><text x="182" y="19" text-anchor="middle" dominant-baseline="central">d</text><path d="M83 40 C74 46 68 42 70 34" class="st-k" marker-end="url(#ar-fi-2)"/><path d="M89 40 C98 46 104 42 102 34" class="st-k" marker-end="url(#ar-fi-2)"/><text x="116" y="56" text-anchor="middle" dominant-baseline="central" class="txd txs">center the a, grow outward to bab</text></g></svg>`,
           tests: [
             "assert longest_palindrome(\"babad\") in (\"bab\", \"aba\")",
             "assert longest_palindrome(\"xabay\") == \"aba\""
           ],
-          hint: "Stopping at center 0 misses every palindrome that sits later in the string."
+          hint: "expand(s, i, i) returns the widest palindrome centered on letter i; track the longest with len()."
         },
         {
-          text: "<strong>Even palindromes grow from a gap.</strong> Expand around (i, i + 1) as well, which catches a palindrome whose two middle characters are equal.",
+          text: "<strong>Even palindromes sit on a gap.</strong> In <code>abba</code> the middle is the gap between the two b letters, not any letter. Also grow around each pair of neighbors i and i + 1, and keep the longest of both kinds.",
           moves: [
-            "Keep the odd expansion at (i, i)",
-            "Add the even expansion at (i, i + 1)",
+            "For each i, also grow expand(s, i, i + 1)",
+            "The pair only grows when both letters match",
             "Compare both candidates with the running best"
           ],
           checks: [{ input: "cbbd", output: "bb" }, { input: "abba", output: "abba" }],
-          diagram: `<svg viewBox="0 0 232 60" aria-hidden="true" focusable="false"><g><rect x="36" y="10" width="32" height="22" rx="7" class="st f2"/><text x="52" y="21" text-anchor="middle" dominant-baseline="central">c</text><rect x="88" y="10" width="32" height="22" rx="7" class="st f5 st-k"/><text x="104" y="21" text-anchor="middle" dominant-baseline="central">b</text><rect x="140" y="10" width="32" height="22" rx="7" class="st f5 st-k"/><text x="156" y="21" text-anchor="middle" dominant-baseline="central">b</text><rect x="192" y="10" width="32" height="22" rx="7" class="st f2"/><text x="208" y="21" text-anchor="middle" dominant-baseline="central">d</text><line x1="132" y1="4" x2="132" y2="38" class="st-d dsh"/><text x="116" y="50" text-anchor="middle" dominant-baseline="central" class="txd txs">the gap between the two b characters</text></g></svg>`,
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="36" y="8" width="32" height="22" rx="6" class="st f2"/><text x="52" y="19" text-anchor="middle" dominant-baseline="central">c</text><rect x="88" y="8" width="32" height="22" rx="6" class="st f5"/><text x="104" y="19" text-anchor="middle" dominant-baseline="central">b</text><rect x="140" y="8" width="32" height="22" rx="6" class="st f5 st-k"/><text x="156" y="19" text-anchor="middle" dominant-baseline="central">b</text><rect x="192" y="8" width="32" height="22" rx="6" class="st f2"/><text x="208" y="19" text-anchor="middle" dominant-baseline="central">d</text><line x1="132" y1="4" x2="132" y2="38" class="st-d dsh"/><text x="116" y="52" text-anchor="middle" dominant-baseline="central" class="txd txs">the gap between the two b letters</text></g></svg>`,
           tests: [
             "assert longest_palindrome(\"cbbd\") == \"bb\"",
             "assert longest_palindrome(\"abba\") == \"abba\""
           ],
-          hint: "With odd centers only, bb has no center to grow from and stays invisible."
+          hint: "expand(s, i, i + 1) starts on a gap: it only grows when the two middle letters are equal, which is how bb and abba appear."
         },
         {
-          text: "<strong>Guard the empty string.</strong> No characters means no center to expand, so best must start empty rather than at s[0].",
+          text: "<strong>Sweep all 2n - 1 centers.</strong> A string of n letters has n letter centers plus n - 1 gaps between letters, so 2n - 1 centers in total. Number them 0 to 2n - 2, where an even number is a letter and an odd number is the gap after it, and start from an empty best so an empty string returns itself.",
           moves: [
-            "Start best as an empty string",
-            "Let the loop cover every nonempty string",
-            "Return best unchanged when s is empty"
+            "Start best as the empty string",
+            "Loop a center number over range(2 * len(s) - 1)",
+            "left is center // 2; right is left plus center % 2",
+            "An empty string has no centers and stays empty"
           ],
-          checks: [{ input: "\"\"", output: "\"\"" }],
-          diagram: `<svg viewBox="0 0 232 56" aria-hidden="true" focusable="false"><defs><marker id="ar-fin-4" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 10 5 0 10 Z" class="mk"/></marker></defs><g><rect x="20" y="16" width="82" height="24" rx="7" class="st dsh"/><text x="61" y="28" text-anchor="middle" dominant-baseline="central" class="txd txs">no centers</text><line x1="110" y1="28" x2="142" y2="28" class="st-k" marker-end="url(#ar-fin-4)"/><rect x="148" y="16" width="44" height="24" rx="7" class="st f2"/><text x="170" y="28" text-anchor="middle" dominant-baseline="central">""</text></g></svg>`,
-          tests: ["assert longest_palindrome(\"\") == \"\""],
-          hint: "Seeding best from s[0] raises IndexError before the loop on empty input."
+          checks: [{ input: "\"\"", output: "\"\"" }, { input: "bananas", output: "anana" }],
+          diagram: `<svg viewBox="0 0 232 62" aria-hidden="true" focusable="false"><g><rect x="56" y="6" width="32" height="20" rx="6" class="st f2"/><text x="72" y="16" text-anchor="middle" dominant-baseline="central">a</text><rect x="96" y="6" width="32" height="20" rx="6" class="st f2"/><text x="112" y="16" text-anchor="middle" dominant-baseline="central">b</text><rect x="136" y="6" width="32" height="20" rx="6" class="st f2"/><text x="152" y="16" text-anchor="middle" dominant-baseline="central">a</text><circle cx="72" cy="42" r="4" class="st f5"/><circle cx="112" cy="42" r="4" class="st f5"/><circle cx="152" cy="42" r="4" class="st f5"/><circle cx="92" cy="42" r="4" class="st dsh"/><circle cx="132" cy="42" r="4" class="st dsh"/><text x="116" y="58" text-anchor="middle" dominant-baseline="central" class="txd txs">3 letters + 2 gaps = 5 centers</text></g></svg>`,
+          tests: [
+            "assert longest_palindrome(\"\") == \"\"",
+            "assert longest_palindrome(\"bananas\") == \"anana\""
+          ],
+          hint: "best starts empty and range(2 * len(s) - 1) runs zero times for an empty string, so no letter is ever read."
         }
       ],
       steps: [
@@ -387,12 +388,7 @@ def longest_palindrome(s):
 
 
 def longest_palindrome(s):
-    best = s[0]                       # first character as the starting best
-    for i in range(1):                # center 0 only
-        cand = expand(s, i, i)
-        if len(cand) > len(best):
-            best = cand
-    return best
+    return s[0]                      # one letter is a palindrome
 `,
         `def expand(s, left, right):
     while left >= 0 and right < len(s) and s[left] == s[right]:
@@ -404,7 +400,7 @@ def longest_palindrome(s):
 def longest_palindrome(s):
     best = s[0]
     for i in range(len(s)):
-        cand = expand(s, i, i)        # odd centers only
+        cand = expand(s, i, i)       # widest palindrome centered on letter i
         if len(cand) > len(best):
             best = cand
     return best
@@ -432,11 +428,13 @@ def longest_palindrome(s):
 
 
 def longest_palindrome(s):
-    best = ""
-    for i in range(len(s)):
-        for cand in (expand(s, i, i), expand(s, i, i + 1)):
-            if len(cand) > len(best):
-                best = cand
+    best = ""                        # empty string has no center to grow
+    for center in range(2 * len(s) - 1):
+        left = center // 2           # even center number: a letter
+        right = left + center % 2    # odd center number: the gap after it
+        cand = expand(s, left, right)
+        if len(cand) > len(best):
+            best = cand
     return best
 `
       ],
@@ -448,11 +446,13 @@ def longest_palindrome(s):
 
 
 def longest_palindrome(s):
-    best = ""
-    for i in range(len(s)):
-        for cand in (expand(s, i, i), expand(s, i, i + 1)):
-            if len(cand) > len(best):
-                best = cand
+    best = ""                        # empty string has no center to grow
+    for center in range(2 * len(s) - 1):
+        left = center // 2           # even center number: a letter
+        right = left + center % 2    # odd center number: the gap after it
+        cand = expand(s, left, right)
+        if len(cand) > len(best):
+            best = cand
     return best
 `,
     },

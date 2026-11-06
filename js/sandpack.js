@@ -148,10 +148,10 @@ export function mountExercise(container, section, opts) {
   const ex = section.exercise;
   const options = opts || {};
   const draftKey = "lp60.code." + section.id;
-  /* v2: every task list changed with the ladders, so checks earned against
+  /* v3: task ladders were rewritten for beginners, so checks earned against
    * the old lists are void. Code drafts still match the unchanged starters
    * and are kept. */
-  const doneKey = "lp60.v2.tasks." + section.id;
+  const doneKey = "lp60.v3.tasks." + section.id;
   const tasks = Array.isArray(ex.tasks) ? ex.tasks : [];
   const done = tasks.map(() => false);
 
