@@ -7,7 +7,7 @@ import { PATTERNS_A } from "./data/sections-patterns-a.js";
 import { PATTERNS_B } from "./data/sections-patterns-b.js";
 import { PATTERNS_C } from "./data/sections-patterns-c.js";
 import { CHEATSHEET } from "./data/reference.js";
-import { mountExercise } from "./sandpack.js?v=17";
+import { mountExercise } from "./sandpack.js?v=20";
 
 /* Canonical chapter order, regardless of import order. */
 const ORDER = [

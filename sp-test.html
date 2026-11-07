@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>Sandpack + Pyodide smoke test</title>
-<link rel="stylesheet" href="css/styles.css?v=17">
+<link rel="stylesheet" href="css/styles.css?v=20">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <style>
   .smoke { max-width: 780px; margin: 0 auto; padding: 48px 24px; }
@@ -17,9 +17,11 @@
 <div class="smoke">
   <h1>Sandpack + Pyodide smoke test</h1>
   <p>
-    The starter below is already solved. Press Run: the Sandpack preview should
-    boot, load Pyodide, and turn all three tasks green. Edit the code to break a
-    task and Run again to see the failure path.
+    The starter below is already solved. Press Submit: the hidden preview should
+    boot Pyodide, judge every task, and turn all three tasks green with an
+    Accepted verdict. Press Run instead to judge only the sample cases of the
+    task in view, or break the code and Submit again to see the failure path
+    in the Result tab.
   </p>
   <div id="mount" class="card exercise"></div>
 </div>
@@ -27,7 +29,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
 <script type="module">
-import { mountExercise } from "./js/sandpack.js?v=17";
+import { mountExercise } from "./js/sandpack.js?v=20";
 
 const section = {
   id: "smoke-test",

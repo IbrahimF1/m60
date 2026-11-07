@@ -1,17 +1,30 @@
 /* js/sandpack.js - Sandpack + Pyodide exercise component for "Medium in 60".
  *
- * Each practice exercise renders the SQLBolt shape in this site's language:
- * a toolbar (Run / Reset / status), the editor with its output below it in
- * the work column, and a task rail on the right. Running appends the hidden
- * checks (js/checks.js) to the user's code, executes it in Pyodide inside a
- * Sandpack preview, and posts one verdict per task back. The rail drips:
- * only earned tasks and the current one are ever shown, behind a progress
- * bar, so each step builds on the code that passed the step before and no
- * expected output is spoiled ahead of its turn. When the whole list is
- * green, the continue pill unlocks.
+ * Each practice exercise renders in the shape the judge sites converged
+ * on (see research/judge-ui-patterns.md): Run and Submit are separate
+ * actions above the editor, and below it a console with two tabs.
+ *
+ *   Testcase  - the sample cases for the task in view, exactly as the
+ *               judge parses them (Input / Expected), plus an opt-in
+ *               custom input with an optional expected value
+ *               (HackerRank's checkbox, LeetCode's editable case).
+ *   Result    - a verdict line (Accepted / Wrong Answer / Runtime Error /
+ *               Syntax Error, case count, milliseconds), Case 1 / Case 2
+ *               tabs with per-case pass/fail marks, and per case the
+ *               Input / Output / Expected blocks with the wrong output
+ *               tinted, a Stdout block for prints, and the case's error.
+ *               Cases beyond the first failing task stay hidden, which
+ *               keeps the rail's drip ladder unspoiled.
+ *
+ * Run judges the task in view (plus the custom case when asked) and never
+ * advances the ladder. Submit judges every task's cases, credits the rail,
+ * and is the only path to Accepted. After either action the console
+ * switches to Result, opened on the first failing case, like LeetCode.
+ * Execution is Pyodide inside a hidden Sandpack preview; the page renders
+ * everything itself from the structured verdicts the judge posts back.
  */
 
-import { composeProgram, RESULT_PROBE } from "./checks.js";
+import { composeProgram, parseTest } from "./checks.js?v=20";
 
 const SP_MODULE_URL = "./vendor/sandpack-client.mjs";
 
@@ -33,44 +46,30 @@ function loadClientFactory() {
   return clientFactoryPromise;
 }
 
-/* The runner lives inside the Sandpack preview iframe. Kept ES5 + string
+/* The judge lives inside the Sandpack preview iframe. Kept ES5 + string
  * concatenation only: this function is serialized with Function.prototype
  * .toString and injected as the iframe's script. No template literals. */
 function __lp60Runner() {
-  var out = document.getElementById("out");
-  var status = document.getElementById("status");
-  function say(t) { out.textContent += t; }
-  function report(ok, results, msg) {
-    var all = ok && results && results.length > 0;
-    if (all) {
-      for (var i = 0; i < results.length; i++) {
-        if (results[i] !== null) { all = false; break; }
-      }
-    }
-    if (ok) {
-      status.className = all ? "ok" : "";
-      status.textContent = all
-        ? "All tasks passed."
-        : "Finished. Some tasks still fail; the page shows which.";
-    } else {
-      status.className = "err";
-      status.textContent = "Error: " + msg;
-    }
+  var consoleText = "";
+  function stage(s) {
+    try { parent.postMessage({ type: "LP60_STAGE", stage: s }, "*"); } catch (e) { /* sandboxed */ }
+  }
+  function say(t) { consoleText += t; }
+  function fail(msg) {
+    stage("done");
     try {
-      parent.postMessage(
-        { type: "LP60_RESULT", ok: ok, results: results || null, error: msg || "" },
-        "*"
-      );
+      parent.postMessage({ type: "LP60_RESULT", ok: false, error: msg, stdout: consoleText }, "*");
     } catch (e) { /* sandboxed */ }
   }
-  window.onerror = function (m) { report(false, null, String(m)); return true; };
+  window.onerror = function (m) { fail(String(m)); return true; };
 
   var code = document.getElementById("py-src").textContent;
 
+  stage("boot");
   var s = document.createElement("script");
   s.src = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/pyodide.js";
   s.onerror = function () {
-    report(false, null, "could not load Pyodide from the CDN (offline?)");
+    fail("could not load Pyodide from the CDN (offline?)");
   };
   s.onload = function () {
     var pyRuntime = null;
@@ -88,18 +87,24 @@ function __lp60Runner() {
         ).then(function () { return py.runPythonAsync(code); });
       })
       .then(function () {
-        /* Read the per-task verdict list the harness left behind. */
-        var results = null;
+        stage("done");
+        var detail = null, results = null;
         try {
+          detail = JSON.parse(pyRuntime.runPython("__import__('json').dumps(__lp60_detail__)"));
           results = JSON.parse(pyRuntime.runPython("__import__('json').dumps(__lp60_results__)"));
-        } catch (e) { results = null; }
-        if (!results) { report(false, null, "the checks did not report a verdict"); return; }
-        report(true, results, "");
+        } catch (e) { detail = null; }
+        if (!detail) { fail("the judge did not report its cases"); return; }
+        try {
+          parent.postMessage(
+            { type: "LP60_RESULT", ok: true, detail: detail, results: results || [], stdout: consoleText },
+            "*"
+          );
+        } catch (e) { /* sandboxed */ }
       })
       .catch(function (e) {
         var msg = String((e && e.message) || e);
         var lines = msg.replace(/\s+$/, "").split("\n");
-        report(false, null, lines.slice(-6).join("\n"));
+        fail(lines.slice(-8).join("\n"));
       });
   };
   document.body.appendChild(s);
@@ -107,41 +112,40 @@ function __lp60Runner() {
 
 function buildRunnerShell(program) {
   const py = String(program).replace(/<\/script/gi, "<\\/script");
-  const css = [
-    "*{box-sizing:border-box;}",
-    "html,body{margin:0;padding:16px;background:#fff;color:#000;",
-    "font:13px/1.65 ui-monospace,'Cascadia Mono',Consolas,monospace;}",
-    "#status{margin:0 0 12px;padding:12px 14px;background:rgba(0,0,0,.02);",
-    "border-radius:16px;color:rgba(0,0,0,.5);white-space:pre-wrap;}",
-    "#status.ok{background:rgba(0,0,0,.05);color:#000;}",
-    "#status.err{color:#B3261E;white-space:pre-wrap;}",
-    "#out{margin:0;white-space:pre-wrap;word-break:break-word;}"
-  ].join("");
   return [
     '<!DOCTYPE html><html><head><meta charset="utf-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
-    "<style>" + css + "</style></head><body>",
-    '<p id="status">Loading Python (Pyodide). First run downloads ~10 MB, cached afterwards.</p>',
-    '<pre id="out"></pre>',
+    "</head><body>",
     '<script type="text/x-python" id="py-src">' + py + "<\/script>",
     "<script>(" + __lp60Runner.toString() + ")();<\/script>",
     "</body></html>"
   ].join("");
 }
 
-/* One global result listener; the active mount registers a handler. */
+/* One global listener; the active mount registers its handlers. */
 let activeResultHandler = null;
+let activeStageHandler = null;
 window.addEventListener("message", (ev) => {
   const d = ev && ev.data;
-  if (d && d.type === "LP60_RESULT" && typeof activeResultHandler === "function") {
-    activeResultHandler(d);
-  }
+  if (!d) return;
+  if (d.type === "LP60_RESULT" && typeof activeResultHandler === "function") activeResultHandler(d);
+  if (d.type === "LP60_STAGE" && typeof activeStageHandler === "function") activeStageHandler(d);
 });
 
 function escHtml(s) {
   return String(s)
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/* The expected text for a parsed case: the literal for `is`, the source
+ * for everything else (they are written as literals in the data). */
+function expectedText(c) {
+  if (!c) return "";
+  if (c.kind === "is") return c.rhs;
+  if (c.kind === "in") return c.rhs + "  (one of)";
+  if (c.kind === "raw") return "the check must pass";
+  return c.rhs;
 }
 
 export function mountExercise(container, section, opts) {
@@ -152,17 +156,32 @@ export function mountExercise(container, section, opts) {
    * the old lists are void. Code drafts still match the unchanged starters
    * and are kept. */
   const doneKey = "lp60.v3.tasks." + section.id;
+  const customKey = "lp60.custom." + section.id;
   const tasks = Array.isArray(ex.tasks) ? ex.tasks : [];
   const done = tasks.map(() => false);
+  const custom = { on: false, input: "", expected: "" };
 
-  /* Restore task checks earned in earlier visits. */
+  /* Restore task checks earned in earlier visits, and the saved custom
+   * testcase (a convenience, never a verdict). */
   try {
     const saved = JSON.parse(localStorage.getItem(doneKey) || "null");
     if (Array.isArray(saved)) saved.forEach((v, i) => { if (i < done.length) done[i] = !!v; });
   } catch (e) { /* private mode */ }
+  try {
+    const c = JSON.parse(localStorage.getItem(customKey) || "null");
+    if (c && typeof c === "object") {
+      custom.on = !!c.on;
+      custom.input = typeof c.input === "string" ? c.input : "";
+      custom.expected = typeof c.expected === "string" ? c.expected : "";
+    }
+  } catch (e) { /* private mode */ }
 
   function persistDone() {
     try { localStorage.setItem(doneKey, JSON.stringify(done.map((v) => (v ? 1 : 0)))); }
+    catch (e) { /* noop */ }
+  }
+  function persistCustom() {
+    try { localStorage.setItem(customKey, JSON.stringify(custom)); }
     catch (e) { /* noop */ }
   }
 
@@ -177,17 +196,42 @@ export function mountExercise(container, section, opts) {
   container.classList.add("sp");
   container.innerHTML =
     '<div class="sp-toolbar">' +
-      '<button class="pill pill-dark pill-sm sp-run" type="button">Run \u25B8</button>' +
+      '<button class="pill pill-light pill-sm sp-run" type="button">Run \u25B8</button>' +
+      (tasks.length ? '<button class="pill pill-dark pill-sm sp-submit" type="button">Submit</button>' : "") +
       '<button class="pill pill-light pill-sm sp-reset" type="button">Reset code</button>' +
-      '<span class="sp-status" data-sp-status>Press Run. Python executes right here, in a Sandpack preview.</span>' +
+      '<span class="sp-status" data-sp-status>Run the samples or submit; Python executes right here, in a hidden preview.</span>' +
     "</div>" +
     '<div class="sp-main' + (tasks.length ? "" : " sp-solo") + '">' +
       '<div class="sp-work">' +
         '<div class="sp-editor-wrap" data-sp-editor></div>' +
-        '<div class="sp-out">' +
-          '<div class="sp-out-head"><span class="label">Output</span></div>' +
-          '<div class="sp-preview-wrap" data-sp-preview></div>' +
+        '<div class="sp-console">' +
+          '<div class="sp-console-tabs" role="tablist" aria-label="Exercise console">' +
+            '<button class="sp-console-tab is-active" type="button" role="tab" aria-selected="true" data-tab="testcase">Testcase</button>' +
+            '<button class="sp-console-tab" type="button" role="tab" aria-selected="false" data-tab="result">Result</button>' +
+            '<span class="sp-console-tabs-space"></span>' +
+          "</div>" +
+          '<div class="sp-console-panel is-active" data-panel="testcase" role="tabpanel">' +
+            '<div class="sp-samples" data-sp-samples></div>' +
+            '<div class="sp-custom">' +
+              '<label class="sp-custom-toggle">' +
+                '<input type="checkbox" data-sp-custom-on' + (custom.on ? " checked" : "") + "> " +
+                "Also run a custom input" +
+              "</label>" +
+              '<div class="sp-custom-fields">' +
+                '<label class="sp-field"><span class="tc-label">Input</span>' +
+                  '<input class="sp-input" type="text" data-sp-custom-in spellcheck="false" autocomplete="off" placeholder=""></label>' +
+                '<label class="sp-field"><span class="tc-label">Expected (optional)</span>' +
+                  '<input class="sp-input" type="text" data-sp-custom-exp spellcheck="false" autocomplete="off" placeholder="[&quot;bat&quot;], [&quot;cat&quot;]"></label>' +
+              "</div>" +
+              '<p class="sp-custom-note small">A Python expression, e.g. <code>group_anagrams(["eat", "tea"])</code>. It runs after the samples; Run shows what it returns.</p>' +
+            "</div>" +
+          "</div>" +
+          '<div class="sp-console-panel" data-panel="result" role="tabpanel">' +
+            '<p class="sp-empty small" data-sp-empty>No results yet. Run the sample cases, or submit to check every task.</p>' +
+            '<div class="sp-result" data-sp-result hidden></div>' +
+          "</div>" +
         "</div>" +
+        '<div class="sp-host" data-sp-preview aria-hidden="true"></div>' +
       "</div>" +
       (tasks.length
         ? '<aside class="sp-tasks" data-sp-tasks aria-label="Exercise tasks">' +
@@ -214,6 +258,7 @@ export function mountExercise(container, section, opts) {
   const previewHost = container.querySelector("[data-sp-preview]");
   const statusEl = container.querySelector("[data-sp-status]");
   const runBtn = container.querySelector(".sp-run");
+  const submitBtn = container.querySelector(".sp-submit");
   const resetBtn = container.querySelector(".sp-reset");
   const listEl = container.querySelector("[data-sp-list]");
   const countEl = container.querySelector("[data-sp-count]");
@@ -223,6 +268,30 @@ export function mountExercise(container, section, opts) {
   const helpEl = container.querySelector("[data-sp-help]");
   const helpWrap = container.querySelector(".task-help");
   const goEl = container.querySelector("[data-sp-go]");
+  const samplesEl = container.querySelector("[data-sp-samples]");
+  const emptyEl = container.querySelector("[data-sp-empty]");
+  const resultEl = container.querySelector("[data-sp-result]");
+  const customOnEl = container.querySelector("[data-sp-custom-on]");
+  const customInEl = container.querySelector("[data-sp-custom-in]");
+  const customExpEl = container.querySelector("[data-sp-custom-exp]");
+  const consoleTabs = container.querySelector(".sp-console-tabs");
+
+  /* --- console tabs ----------------------------------------------------- */
+
+  function switchTab(name) {
+    container.querySelectorAll(".sp-console-tab").forEach((b) => {
+      const on = b.getAttribute("data-tab") === name;
+      b.classList.toggle("is-active", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    container.querySelectorAll(".sp-console-panel").forEach((p) => {
+      p.classList.toggle("is-active", p.getAttribute("data-panel") === name);
+    });
+  }
+  if (consoleTabs) consoleTabs.addEventListener("click", (ev) => {
+    const b = ev.target.closest ? ev.target.closest("[data-tab]") : null;
+    if (b) switchTab(b.getAttribute("data-tab"));
+  });
 
   /* --- task rail -------------------------------------------------------
    * The rail drips and steps: a completed task's description collapses out
@@ -238,6 +307,40 @@ export function mountExercise(container, section, opts) {
   let prevActive = -2;
   let viewIndex = -1;
   let lastResults = null;
+  let lastRenderedView = -1;
+
+  function casesFor(i) {
+    const t = tasks[i];
+    if (!t) return [];
+    return (t.tests || (t.test ? [t.test] : [])).map(parseTest);
+  }
+
+  /* The Testcase panel: the sample cases for whichever task the rail has
+   * in view, shown as the judge sees them. Re-rendered whenever the view
+   * moves (the custom fields below are separate DOM and keep their text). */
+  function renderSamples() {
+    if (!samplesEl) return;
+    const t = tasks[viewIndex];
+    if (!t) { samplesEl.innerHTML = ""; return; }
+    const cases = casesFor(viewIndex);
+    const rows = cases.map((c, i) =>
+      '<li><span class="sp-case-n">' + (i + 1) + "</span>" +
+        '<span class="sp-io">' +
+          '<span class="sp-io-row"><span class="tc-label">Input</span>' +
+            "<code>" + escHtml(c.kind === "raw" ? c.src : c.lhs) + "</code></span>" +
+          '<span class="sp-io-row"><span class="tc-label">Expected</span>' +
+            "<code>" + escHtml(expectedText(c)) + "</code></span>" +
+        "</span></li>"
+    ).join("");
+    samplesEl.innerHTML =
+      '<span class="label">Sample cases \u00B7 task ' + String(viewIndex + 1).padStart(2, "0") + "</span>" +
+      '<ol class="sp-cases">' + rows + "</ol>";
+    if (customInEl && !custom.input) {
+      customInEl.placeholder = cases.length
+        ? cases[0].kind === "raw" ? "your own expression" : cases[0].lhs
+        : "your own expression";
+    }
+  }
 
   function renderTasks(latest) {
     lastResults = latest;
@@ -251,6 +354,7 @@ export function mountExercise(container, section, opts) {
     if (freshTask) viewIndex = active;
     if (active === -1 && !wasAllDone) viewIndex = tasks.length - 1;   /* finish on the last step */
     viewIndex = Math.max(0, Math.min(viewIndex, maxView));
+    const viewMoved = viewIndex !== lastRenderedView;
 
     const viewed = tasks[viewIndex];
     if (listEl && viewed) {
@@ -322,6 +426,9 @@ export function mountExercise(container, section, opts) {
       if (unlocked) goEl.removeAttribute("aria-disabled");
       else goEl.setAttribute("aria-disabled", "true");
     }
+
+    if (viewMoved) renderSamples();
+    lastRenderedView = viewIndex;
   }
 
   /* Step through reviewable tasks: arrows move one, a bar segment jumps. */
@@ -352,6 +459,24 @@ export function mountExercise(container, section, opts) {
     });
   }
 
+  /* --- custom testcase --------------------------------------------------- */
+
+  if (customOnEl) customOnEl.addEventListener("change", () => {
+    custom.on = customOnEl.checked;
+    persistCustom();
+  });
+  if (customInEl) customInEl.addEventListener("input", () => {
+    custom.input = customInEl.value;
+    if (custom.input.trim() && !custom.on) { custom.on = true; customOnEl.checked = true; }
+    persistCustom();
+  });
+  if (customExpEl) customExpEl.addEventListener("input", () => {
+    custom.expected = customExpEl.value;
+    persistCustom();
+  });
+  customInEl.value = custom.input;
+  customExpEl.value = custom.expected;
+
   renderTasks(null);
 
   /* --- editor ---------------------------------------------------------- */
@@ -377,7 +502,9 @@ export function mountExercise(container, section, opts) {
       extraKeys: {
         Tab: (cmInst) => cmInst.replaceSelection("    ", "end"),
         "Ctrl-Enter": () => runBtn.click(),
-        "Cmd-Enter": () => runBtn.click()
+        "Cmd-Enter": () => runBtn.click(),
+        "Shift-Ctrl-Enter": () => { if (submitBtn) submitBtn.click(); },
+        "Shift-Cmd-Enter": () => { if (submitBtn) submitBtn.click(); }
       }
     });
     cm.setSize("100%", "100%");
@@ -412,7 +539,128 @@ export function mountExercise(container, section, opts) {
   if (editor && typeof editor.on === "function") editor.on("change", persistDraft);
   else editorHost.addEventListener("input", persistDraft);
 
-  /* --- sandpack run ----------------------------------------------------- */
+  /* --- result panel ----------------------------------------------------- */
+
+  /* Everything the Result tab shows about one judge run. */
+  let lastRun = null;         /* {mode, detail, results, stdout, error} */
+  let selectedCase = 0;
+
+  function fmtMs(total) {
+    if (total >= 100) return Math.round(total) + " ms";
+    if (total >= 10) return Math.round(total * 10) / 10 + " ms";
+    return Math.round(total * 100) / 100 + " ms";
+  }
+
+  function kvRow(label, value, bad) {
+    return '<div class="sp-kv' + (bad ? " is-bad" : "") + '">' +
+      '<span class="tc-label">' + escHtml(label) + "</span>" +
+      '<code class="sp-kv-val">' + escHtml(value) + "</code></div>";
+  }
+
+  function renderCaseBody(c) {
+    const isCustom = c.task === -1;
+    const bad = !c.ok && !c.error;
+    let html = '<div class="sp-case-body">';
+    if (isCustom) html += '<span class="sp-case-task">custom input</span>';
+    else if (tasks.length) html += '<span class="sp-case-task">task ' + String(c.task + 1).padStart(2, "0") + "</span>";
+    if (c.error) {
+      html += '<div class="sp-kv"><span class="tc-label">Input</span>' +
+        '<code class="sp-kv-val">' + escHtml(c.kind === "raw" ? c.src : c.input) + "</code></div>";
+      html += '<pre class="sp-case-error"><code>' + escHtml(c.error) + "</code></pre>";
+    } else {
+      html += kvRow("Input", c.kind === "raw" ? c.src : c.input, false);
+      html += kvRow(c.oneof ? "Output (one of these)" : "Output", c.actual == null ? "None" : c.actual, bad);
+      if (c.expected != null) html += kvRow("Expected", c.expected, false);
+    }
+    if (c.stdout) html += '<div class="sp-case-stdout"><span class="tc-label">Stdout</span>' +
+      "<pre><code>" + escHtml(c.stdout.replace(/\s+$/, "")) + "</code></pre></div>";
+    html += '<span class="sp-case-ms">' + fmtMs(c.ms) + "</span>";
+    html += "</div>";
+    return html;
+  }
+
+  function renderResult() {
+    if (!resultEl) return;
+    if (!lastRun) { resultEl.hidden = true; if (emptyEl) emptyEl.hidden = false; return; }
+    if (emptyEl) emptyEl.hidden = true;
+    resultEl.hidden = false;
+
+    const r = lastRun;
+
+    /* A program-level failure (syntax error, traceback, Pyodide load):
+     * no cases exist, only the error. */
+    if (!r.detail) {
+      const syntax = /SyntaxError|IndentationError|TabError/.test(r.error || "");
+      resultEl.innerHTML =
+        '<div class="sp-verdict-row"><span class="sp-verdict is-err">' +
+          (syntax ? "Syntax Error" : "Runtime Error") + "</span>" +
+          '<span class="sp-verdict-meta">' + escHtml(r.mode === "submit" ? "submission" : "sample run") + "</span></div>" +
+        '<pre class="sp-case-error"><code>' + escHtml(r.error || "") + "</code></pre>" +
+        (r.stdout ? consoleBlock(r.stdout) : "");
+      return;
+    }
+
+    /* The drip guard: on a submission, cases after the first failing
+     * task stay unread (their inputs would spoil the ladder ahead). */
+    let shown = r.detail;
+    let hiddenNote = "";
+    if (r.mode === "submit" && tasks.length) {
+      let firstFailTask = -1;
+      for (const c of r.detail) if (!c.ok && c.task >= 0) { firstFailTask = c.task; break; }
+      if (firstFailTask >= 0 && firstFailTask < tasks.length - 1) {
+        shown = r.detail.filter((c) => c.task <= firstFailTask);
+        hiddenNote = '<p class="sp-hidden-note small">Cases for tasks ' + (firstFailTask + 2) + "\u2013" + tasks.length +
+          " stay hidden until task " + (firstFailTask + 1) + " passes.</p>";
+      }
+    }
+
+    const passN = shown.filter((c) => c.ok).length;
+    const anyErr = shown.some((c) => c.error);
+    const allPass = passN === shown.length;
+    const runtimeMs = shown.reduce((a, c) => a + (Number(c.ms) || 0), 0);
+
+    let verdict, vClass;
+    if (anyErr) { verdict = "Runtime Error"; vClass = "is-err"; }
+    else if (!allPass) { verdict = "Wrong Answer"; vClass = "is-err"; }
+    else if (r.mode === "submit") { verdict = "Accepted"; vClass = "is-ok"; }
+    else { verdict = "Finished"; vClass = "is-ok"; }
+
+    const tabs = shown.map((c, i) => {
+      const label = c.task === -1 ? "custom" : String(i + 1);
+      const mark = c.ok ? " \u2713" : " \u00D7";
+      const cls = "sp-case-tab" + (c.ok ? " is-pass" : " is-fail") + (i === selectedCase ? " is-active" : "");
+      return '<button class="' + cls + '" type="button" data-case="' + i + '" aria-label="Case ' + label +
+        ": " + (c.ok ? "passed" : c.error ? "error" : "wrong answer") + '">' + label + mark + "</button>";
+    }).join("");
+
+    const sel = shown[Math.min(selectedCase, shown.length - 1)];
+    resultEl.innerHTML =
+      '<div class="sp-verdict-row">' +
+        '<span class="sp-verdict ' + vClass + '">' + verdict + "</span>" +
+        '<span class="sp-verdict-meta">' + passN + "/" + shown.length + " cases \u00B7 " + fmtMs(runtimeMs) +
+          " \u00B7 " + (r.mode === "submit" ? "submission" : "sample run") + "</span>" +
+      "</div>" +
+      (shown.length
+        ? '<div class="sp-case-tabs" role="tablist" aria-label="Cases">' + tabs + "</div>" +
+          renderCaseBody(sel)
+        : "") +
+      hiddenNote +
+      (r.stdout ? consoleBlock(r.stdout) : "");
+  }
+
+  function consoleBlock(stdout) {
+    return '<div class="sp-console-out"><span class="tc-label">Console (print output)</span>' +
+      "<pre><code>" + escHtml(stdout.replace(/\s+$/, "")) + "</code></pre></div>";
+  }
+
+  resultEl.addEventListener("click", (ev) => {
+    const b = ev.target.closest ? ev.target.closest("[data-case]") : null;
+    if (!b) return;
+    selectedCase = Number(b.getAttribute("data-case"));
+    renderResult();
+  });
+
+  /* --- the run itself ---------------------------------------------------- */
 
   let client = null;
   let seq = 0;
@@ -423,44 +671,96 @@ export function mountExercise(container, section, opts) {
     if (cls) statusEl.classList.add(cls);
   }
 
-  function run() {
+  function startRun(mode) {
     const my = ++seq;
-    setStatus("Booting Python in the preview\u2026 (first run fetches Pyodide)");
-    renderTasks(null);
+    const customWanted = mode === "run" && custom.on && custom.input.trim();
+    if (mode === "run" && !tasks.length && !customWanted) {
+      setStatus("Type a custom input in the Testcase panel first, then Run.", "is-err");
+      switchTab("testcase");
+      customInEl.focus();
+      return;
+    }
+    const taskIndex = mode === "run" ? Math.max(0, viewIndex) : -1;
+    if (mode === "run") {
+      setStatus(
+        tasks.length
+          ? "Running task " + String(taskIndex + 1).padStart(2, "0") + " sample cases\u2026 (first run boots Pyodide)"
+          : "Running the custom input\u2026 (first run boots Pyodide)"
+      );
+    } else {
+      setStatus("Submitting: judging every task\u2026 (first run boots Pyodide)");
+    }
     if (client) { try { client.destroy(); } catch (e) { /* noop */ } client = null; }
     previewHost.textContent = "";
 
+    activeStageHandler = (d) => {
+      if (my !== seq) return;
+      if (d.stage === "boot") setStatus("Loading Python (Pyodide). First run downloads ~10 MB, cached afterwards.");
+    };
     activeResultHandler = (d) => {
       if (my !== seq) return;
+      activeStageHandler = null;
+
       if (!d.ok) {
-        setStatus("Error. See the traceback in the output.", "is-err");
+        lastRun = { mode: mode, detail: null, error: d.error || "", stdout: d.stdout || "" };
+        selectedCase = 0;
+        renderResult();
+        switchTab("result");
+        setStatus(/SyntaxError|IndentationError|TabError/.test(d.error || "")
+          ? "Syntax error in your code. See Result."
+          : "Your code raised before any case ran. See Result.", "is-err");
         return;
       }
+
+      const detail = Array.isArray(d.detail) ? d.detail : [];
       const results = Array.isArray(d.results) ? d.results : [];
-      let earned = false;
-      results.forEach((v, i) => {
-        if (v === null && i < done.length && !done[i]) { done[i] = true; earned = true; }
-      });
-      if (earned) persistDone();
-      renderTasks(results);
 
-      if (!results.length) {
-        setStatus("Finished, but no verdict came back from the checks. Press Run to try again.", "is-err");
-        return;
+      if (mode === "submit") {
+        let earned = false;
+        results.forEach((v, i) => {
+          if (v === null && i < done.length && !done[i]) { done[i] = true; earned = true; }
+        });
+        if (earned) persistDone();
       }
 
-      const passed = done.filter(Boolean).length;
-      if (tasks.length && passed === tasks.length) {
-        setStatus("All " + tasks.length + " tasks pass \u2713 Chapter marked complete.", "is-ok");
-        if (typeof window.__lp60Pass === "function") window.__lp60Pass(section.id);
+      /* Open on the first failing case, like LeetCode. */
+      const firstFail = detail.findIndex((c) => !c.ok);
+      selectedCase = firstFail >= 0 ? firstFail : 0;
+      lastRun = { mode: mode, detail: detail, results: results, stdout: d.stdout || "", error: "" };
+
+      renderTasks(mode === "submit" ? results : runVerdicts(results));
+      renderResult();
+      switchTab("result");
+
+      /* The status line narrates; the Result panel shows the cases. */
+      if (mode === "submit") {
+        const passed = done.filter(Boolean).length;
+        if (tasks.length && passed === tasks.length) {
+          setStatus("Accepted. All " + tasks.length + " tasks pass \u2713 Chapter marked complete.", "is-ok");
+          if (typeof window.__lp60Pass === "function") window.__lp60Pass(section.id);
+        } else {
+          const firstFailTask = results.findIndex((v) => v !== null);
+          setStatus(
+            passed + " of " + tasks.length + " tasks pass. Task " + (firstFailTask + 1) + ": " +
+              results[firstFailTask] + ". See Result.",
+            "is-err"
+          );
+        }
       } else {
-        const firstFail = results.findIndex((v) => v !== null);
-        const errName = firstFail >= 0 ? results[firstFail] : "";
-        setStatus(
-          passed + " of " + tasks.length + " tasks pass. Task " + (firstFail + 1) + " fails" +
-          (errName ? " (" + errName + ")" : "") + "; see the output.",
-          "is-err"
-        );
+        const shownPass = detail.filter((c) => c.ok).length;
+        if (!detail.length) {
+          setStatus("No cases ran. Check the custom input and try again.", "is-err");
+        } else if (shownPass === detail.length) {
+          const customOnly = detail.length === 1 && detail[0].task === -1;
+          setStatus(customOnly
+            ? "Custom input finished. See Result for what it returned."
+            : "Sample cases pass\u2014Submit to check every task.", "is-ok");
+        } else {
+          const firstBad = detail.findIndex((c) => !c.ok);
+          setStatus("Case " + (firstBad + 1) + (detail[firstBad].task === -1 ? " (custom)" : "") +
+            ": " + (detail[firstBad].error ? detail[firstBad].error.split(":", 1)[0] : "wrong answer") +
+            ". See Result.", "is-err");
+        }
       }
     };
 
@@ -468,14 +768,20 @@ export function mountExercise(container, section, opts) {
       try {
         const factory = await loadClientFactory();
         if (my !== seq) return;
-        const program = composeProgram(getValue(), tasks);
+        const program = mode === "run"
+          ? composeProgram(getValue(), tasks, {
+              mode: "run",
+              taskIndex: taskIndex,
+              custom: customWanted ? { input: custom.input, expected: custom.expected } : null
+            })
+          : composeProgram(getValue(), tasks);
         const files = {
           "/main.py": { code: program },
           "/index.html": { code: buildRunnerShell(program) }
         };
         const iframe = document.createElement("iframe");
         iframe.title = "Python preview";
-        iframe.style.cssText = "width:100%;height:100%;border:0;display:block;background:#fff;";
+        iframe.style.cssText = "width:1px;height:1px;border:0;display:block;";
         previewHost.appendChild(iframe);
         const c = await factory(
           iframe,
@@ -491,13 +797,25 @@ export function mountExercise(container, section, opts) {
     })();
   }
 
-  runBtn.addEventListener("click", run);
+  /* Run keeps its own per-task verdict list: the judged task's reason (or
+   * null) in its slot, null everywhere else, so the rail can flag the one
+   * task that was just sampled without crediting anything. */
+  function runVerdicts(results) {
+    const v = tasks.map(() => null);
+    if (viewIndex >= 0 && viewIndex < v.length && Array.isArray(results) && results[viewIndex] != null) {
+      v[viewIndex] = results[viewIndex];
+    }
+    return v;
+  }
+
+  runBtn.addEventListener("click", () => startRun("run"));
+  if (submitBtn) submitBtn.addEventListener("click", () => startRun("submit"));
   resetBtn.addEventListener("click", () => {
     setValue(starter);
     try { localStorage.removeItem(draftKey); } catch (e) { /* noop */ }
-    setStatus("Code reset to the starter. Press Run.");
+    setStatus("Code reset to the starter.");
     if (editor && editor.refresh) editor.refresh();
   });
 
-  return { run, getEditor: () => editor };
+  return { run: () => startRun("run"), getEditor: () => editor };
 }

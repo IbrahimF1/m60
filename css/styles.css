@@ -635,20 +635,274 @@ ol.toc-list { list-style: none; margin: 0; padding: 0; }
 
 .sp-editor-wrap { position: relative; height: 340px; }
 
-.sp-out { border-top: 1px solid var(--ink-05); }
+/* The console: Testcase / Result tabs under the editor, the shape every
+ * judge site converged on (see research/judge-ui-patterns.md). */
+.sp-console { border-top: 1px solid var(--ink-05); }
 
-.sp-out-head { padding: 16px 24px 10px; }
-
-.sp-preview-wrap { position: relative; height: 260px; background: var(--white); }
-
-.sp-preview-wrap iframe {
-  display: block;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
+.sp-console-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  padding: 8px 24px 0;
 }
+
+.sp-console-tab {
+  border: 0;
+  background: none;
+  padding: 8px 12px 10px;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: var(--track);
+  color: var(--ink-50);
+  cursor: pointer;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  transition: color var(--speed), border-color var(--speed);
+}
+
+.sp-console-tab:hover { color: var(--ink); }
+
+.sp-console-tab.is-active {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.sp-console-tabs-space { flex: 1; }
+
+.sp-console-panel { display: none; padding: 14px 24px 18px; max-height: 340px; overflow-y: auto; }
+
+.sp-console-panel.is-active { display: block; }
+
+/* Testcase panel: the sample cases for the task in view, numbered, one
+ * Input / Expected pair per row, then the custom input block. */
+.sp-samples .label { display: block; }
+
+.sp-cases { list-style: none; margin: 8px 0 0; padding: 0; }
+
+.sp-cases li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 10px;
+  margin-top: 4px;
+  background: var(--ink-02);
+  border-radius: 10px;
+}
+
+.sp-case-n {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 2;
+  color: var(--ink-20);
+  font-variant-numeric: tabular-nums;
+}
+
+.sp-io { min-width: 0; display: grid; gap: 2px; }
+
+.sp-io-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+.sp-io-row code { min-width: 0; word-break: break-word; white-space: pre-wrap; }
+
+.sp-io-row .tc-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-20); }
+
+.sp-custom { margin-top: 16px; border-top: 1px dashed var(--ink-10); padding-top: 12px; }
+
+.sp-custom-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  letter-spacing: var(--track);
+  color: var(--ink-59);
+  cursor: pointer;
+}
+
+.sp-custom-toggle input { accent-color: var(--ink); width: 15px; height: 15px; margin: 0; }
+
+.sp-custom-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 10px; }
+
+.sp-field { display: grid; gap: 4px; min-width: 0; }
+
+.sp-field .tc-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-20); }
+
+.sp-input {
+  width: 100%;
+  border: 1px solid var(--ink-10);
+  border-radius: 10px;
+  background: var(--white);
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--speed);
+}
+
+.sp-input::placeholder { color: var(--ink-20); }
+
+.sp-input:focus { border-color: var(--ink-50); }
+
+.sp-custom-note { margin-top: 8px; color: var(--ink-50); }
+
+.sp-custom-note code { font-size: .9em; background: var(--ink-05); border-radius: 6px; padding: 1px 5px; }
+
+/* Result panel: verdict line, per-case tabs, per-case body. */
+.sp-empty { color: var(--ink-50); margin: 0; }
+
+.sp-verdict-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.sp-verdict { font-size: 18px; letter-spacing: var(--track); }
+
+.sp-verdict.is-ok { color: var(--ink); }
+
+.sp-verdict.is-err { color: var(--err); }
+
+.sp-verdict-meta {
+  font-size: 13px;
+  letter-spacing: var(--track);
+  color: var(--ink-50);
+  font-variant-numeric: tabular-nums;
+}
+
+.sp-case-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.sp-case-tab {
+  border: 0;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0;
+  border-radius: 999px;
+  background: var(--ink-05);
+  color: var(--ink-59);
+  cursor: pointer;
+  transition: background-color var(--speed), color var(--speed);
+}
+
+.sp-case-tab.is-pass:hover { background: var(--ink-10); color: var(--ink); }
+
+.sp-case-tab.is-fail { background: rgba(179, 38, 30, .08); color: var(--err); }
+
+.sp-case-tab.is-fail:hover { background: rgba(179, 38, 30, .14); }
+
+.sp-case-tab.is-active { outline: 2px solid var(--ink); outline-offset: -2px; color: var(--ink); }
+
+.sp-case-tab.is-fail.is-active { outline-color: var(--err); color: var(--err); }
+
+/* One case: a task chip, Input / Output / Expected rows, Stdout, error. */
+.sp-case-body {
+  position: relative;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--ink-02);
+  border-radius: var(--r-media);
+  display: grid;
+  gap: 6px;
+}
+
+.sp-case-task {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-20);
+}
+
+.sp-kv {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+.sp-kv .tc-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-20); }
+
+.sp-kv-val { min-width: 0; word-break: break-word; white-space: pre-wrap; }
+
+/* The wrong output is the one thing that earns the error color. */
+.sp-kv.is-bad .tc-label { color: var(--err); }
+
+.sp-kv.is-bad .sp-kv-val { color: var(--err); }
+
+.sp-case-stdout, .sp-console-out { min-width: 0; }
+
+.sp-case-stdout pre, .sp-console-out pre {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  background: var(--white);
+  border-radius: 10px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sp-case-stdout .tc-label, .sp-console-out .tc-label {
+  display: block;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-20);
+}
+
+.sp-case-error {
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  background: rgba(179, 38, 30, .06);
+  border-left: 2px solid var(--err);
+  border-radius: 8px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--err);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sp-case-ms {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-20);
+  font-variant-numeric: tabular-nums;
+}
+
+.sp-hidden-note {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--ink-02);
+  color: var(--ink-50);
+}
+
+.sp-console-out { margin-top: 14px; border-top: 1px dashed var(--ink-10); padding-top: 10px; }
+
+/* The Sandpack + Pyodide preview: machinery, not a pane. */
+.sp-host { position: relative; height: 0; overflow: hidden; }
 
 /* Task rail: SQLBolt's numbered checklist, in this site's voice. */
 .sp-tasks {
@@ -1255,8 +1509,10 @@ details.solution pre code { background: none; padding: 0; }
   .sp-main { grid-template-columns: minmax(0, 1fr); }
   .sp-work { border-right: 0; }
   .sp-editor-wrap { height: 300px; }
-  .sp-out-head { padding: 14px 20px 8px; }
-  .sp-preview-wrap { height: 220px; }
+  .sp-console-tabs { padding: 8px 20px 0; }
+  .sp-console-panel { padding: 12px 20px 16px; max-height: 300px; }
+  .sp-custom-fields { grid-template-columns: minmax(0, 1fr); }
+  .sp-kv, .sp-io-row { grid-template-columns: 76px minmax(0, 1fr); }
   .sp-tasks { border-top: 1px solid var(--ink-05); padding: 18px 20px 24px; }
   details.solution summary { padding: 16px 20px; }
   details.solution pre { margin: 0 20px 24px; }
@@ -1301,7 +1557,7 @@ details.solution pre code { background: none; padding: 0; }
   .wordmark-top,
   .dock,
   .sp-toolbar,
-  .sp-out,
+  .sp-console,
   .sp-tasks,
   .mark-done,
   .footer-blur,
